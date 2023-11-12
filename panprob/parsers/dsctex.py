@@ -420,5 +420,3 @@ def parse(
     tree = convert(prob_node)
     assert isinstance(tree, ast.Problem)
     return tree
-
-
