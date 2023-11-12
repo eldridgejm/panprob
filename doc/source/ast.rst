@@ -88,3 +88,11 @@ AST works.
         ast.Text("very", bold=True),
         ast.Text(" common."),
     ]))
+
+Postprocessors
+--------------
+
+These "postprocessors" take an AST as input and (typically) modify it in some
+way.
+
+.. autofunction:: panprob.ast.postprocessors.paragraphize
