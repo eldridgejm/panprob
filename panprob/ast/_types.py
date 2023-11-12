@@ -99,9 +99,7 @@ class Problem(InternalNode):
     - MultipleSelect
     - TrueFalse
     - Solution
-    - NormalText
-    - BoldText
-    - ItalicText
+    - Text
     - InlineMath
     - InlineCode
     - Paragraph
@@ -123,25 +121,15 @@ class Paragraph(InternalNode):
 
     Can contain the following node types:
 
-    - NormalText
-    - BoldText
-    - ItalicText
+    - Text
     - InlineMath
     - InlineCode
 
     """
 
 
-class _TextNode(LeafNode, ABC):
-    """Abstract base class for text nodes."""
-
-    def __init__(self, text):
-        super().__init__()
-        self.text = text
-
-
-class NormalText(_TextNode):
-    """Text with no formatting.
+class Text(LeafNode):
+    """Text, optionally bold, and/or italic.
 
     A leaf node.
 
@@ -149,34 +137,18 @@ class NormalText(_TextNode):
     ----------
     text : str
         The text.
+    bold : bool
+        If the text should be bold.
+    italic : bool
+        If the text should be italic.
 
     """
 
-
-class BoldText(_TextNode):
-    """Text that should be bolded.
-
-    A leaf node.
-
-    Attributes
-    ----------
-    text : str
-        The text to make bold.
-
-    """
-
-
-class ItalicText(_TextNode):
-    """Text that should be italicized.
-
-    A leaf node.
-
-    Attributes
-    ----------
-    text : str
-        The text to italicize.
-
-    """
+    def __init__(self, text, bold=False, italic=False):
+        super().__init__()
+        self.text = text
+        self.bold = bold
+        self.italic = italic
 
 
 class DisplayMath(LeafNode):
@@ -314,9 +286,7 @@ class Choice(InternalNode):
 
     Can contain the following node types:
 
-    - NormalText
-    - BoldText
-    - ItalicText
+    - Text
     - InlineMath
     - DisplayMath
     - Code
@@ -374,18 +344,14 @@ Problem.allowed_child_types = (
     MultipleSelect,
     TrueFalse,
     Solution,
-    NormalText,
-    BoldText,
-    ItalicText,
+    Text,
     InlineMath,
     InlineCode,
     Paragraph,
 )
 
 Paragraph.allowed_child_types = (
-    NormalText,
-    BoldText,
-    ItalicText,
+    Text,
     InlineMath,
     InlineCode,
 )
@@ -398,9 +364,7 @@ MultipleChoice.allowed_child_types = (Choice,)
 MultipleSelect.allowed_child_types = (Choice,)
 
 Choice.allowed_child_types = (
-    NormalText,
-    BoldText,
-    ItalicText,
+    Text,
     InlineMath,
     DisplayMath,
     Code,

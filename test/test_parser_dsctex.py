@@ -17,7 +17,7 @@ def test_parses_problem_with_text_inside():
 
     expected = ast.Problem(
         children=[
-            ast.NormalText("hello world"),
+            ast.Text("hello world"),
         ]
     )
 
@@ -47,15 +47,15 @@ def test_subproblems():
 
     expected = ast.Problem(
         children=[
-            ast.NormalText("\n    This is the problem.\n\n    "),
+            ast.Text("\n    This is the problem.\n\n    "),
             ast.Subproblem(
                 children=[
-                    ast.NormalText("\n            hello world\n        "),
+                    ast.Text("\n            hello world\n        "),
                 ]
             ),
             ast.Subproblem(
                 children=[
-                    ast.NormalText("\n            goodbye world\n        "),
+                    ast.Text("\n            goodbye world\n        "),
                 ]
             ),
         ]
@@ -80,8 +80,8 @@ def test_parses_problem_with_bold_text():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello "),
-            ast.BoldText("world"),
+            ast.Text("\n    hello "),
+            ast.Text("world", bold=True),
         ]
     )
 
@@ -99,8 +99,8 @@ def parses_problem_with_italic_text():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello "),
-            ast.ItalicText("world"),
+            ast.Text("\n    hello "),
+            ast.Text("world", italic=True),
         ]
     )
 
@@ -121,7 +121,7 @@ def test_parses_problem_with_inline_math():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello "),
+            ast.Text("\n    hello "),
             ast.InlineMath(r"f(x) \geq 42"),
         ]
     )
@@ -140,7 +140,7 @@ def test_parses_problem_with_dollar_dollar_math():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello "),
+            ast.Text("\n    hello "),
             ast.DisplayMath("f(x) = 42"),
         ]
     )
@@ -159,7 +159,7 @@ def test_parses_problem_with_display_math():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello "),
+            ast.Text("\n    hello "),
             ast.DisplayMath("f(x) = 42"),
         ]
     )
@@ -254,18 +254,18 @@ def test_problem_with_multiple_choices():
                 children=[
                     ast.Choice(
                         children=[
-                            ast.NormalText(" hello "),
-                            ast.BoldText("world"),
+                            ast.Text(" hello "),
+                            ast.Text("world", bold=True),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.NormalText(" goodbye world\n        "),
+                            ast.Text(" goodbye world\n        "),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.NormalText(" goodbye world\n    "),
+                            ast.Text(" goodbye world\n    "),
                         ],
                         correct=True,
                     ),
@@ -296,18 +296,18 @@ def test_problem_with_multiple_select():
                 children=[
                     ast.Choice(
                         children=[
-                            ast.NormalText(" hello "),
-                            ast.BoldText("world"),
+                            ast.Text(" hello "),
+                            ast.Text("world", bold=True),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.NormalText(" goodbye world\n        "),
+                            ast.Text(" goodbye world\n        "),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.NormalText(" goodbye world\n    "),
+                            ast.Text(" goodbye world\n    "),
                         ],
                         correct=True,
                     ),
@@ -340,8 +340,8 @@ def test_problem_with_code_in_multiple_choice():
                 children=[
                     ast.Choice(
                         children=[
-                            ast.NormalText(" hello "),
-                            ast.BoldText("world"),
+                            ast.Text(" hello "),
+                            ast.Text("world", bold=True),
                         ]
                     ),
                     ast.Choice(
@@ -381,10 +381,10 @@ def test_problem_with_solution():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello world\n    "),
+            ast.Text("\n    hello world\n    "),
             ast.Solution(
                 children=[
-                    ast.NormalText("\n        goodbye world\n    "),
+                    ast.Text("\n        goodbye world\n    "),
                 ]
             ),
         ]
@@ -405,7 +405,7 @@ def test_problem_with_Tf():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello world\n    "),
+            ast.Text("\n    hello world\n    "),
             ast.TrueFalse(solution=True),
         ]
     )
@@ -425,7 +425,7 @@ def test_problem_with_tF():
 
     assert tree == ast.Problem(
         children=[
-            ast.NormalText("\n    hello world\n    "),
+            ast.Text("\n    hello world\n    "),
             ast.TrueFalse(solution=False),
         ]
     )
@@ -465,13 +465,13 @@ def test_overriding_existing_converter():
     """
 
     def convert_textbf(node, children):
-        return ast.ItalicText("IT WORKED")
+        return ast.Text("IT WORKED", italic=True)
 
     tree = parse(latex, command_converters={"textbf": convert_textbf})
 
     assert tree == ast.Problem(
         children=[
-            ast.ItalicText("IT WORKED"),
+            ast.Text("IT WORKED", italic=True),
         ]
     )
 

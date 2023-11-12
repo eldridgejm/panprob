@@ -21,13 +21,13 @@ def test_creating_an_internal_node_raises_if_children_are_of_improper_type():
 def test_iterate_over_children():
     prob_1 = ast.Problem()
 
-    prob_1.add_child(ast.NormalText("hello"))
-    prob_1.add_child(ast.NormalText("world"))
+    prob_1.add_child(ast.Text("hello"))
+    prob_1.add_child(ast.Text("world"))
 
     prob_2 = ast.Problem()
 
-    prob_2.add_child(ast.NormalText("hello"))
-    prob_2.add_child(ast.NormalText("world"))
+    prob_2.add_child(ast.Text("hello"))
+    prob_2.add_child(ast.Text("world"))
 
     assert list(prob_1.children) == list(prob_2.children)
 
@@ -35,21 +35,21 @@ def test_iterate_over_children():
 def test_equality_is_evaluated_recursively():
     prob_1 = ast.Problem()
 
-    prob_1.add_child(ast.NormalText("hello"))
-    prob_1.add_child(ast.NormalText("world"))
+    prob_1.add_child(ast.Text("hello"))
+    prob_1.add_child(ast.Text("world"))
 
     prob_2 = ast.Problem()
 
-    prob_2.add_child(ast.NormalText("hello"))
-    prob_2.add_child(ast.NormalText("world"))
+    prob_2.add_child(ast.Text("hello"))
+    prob_2.add_child(ast.Text("world"))
 
     assert list(prob_1.children) == list(prob_2.children)
 
 
 def test_deep_copy():
     prob_1 = ast.Problem()
-    prob_1.add_child(ast.NormalText("hello"))
-    prob_1.add_child(ast.NormalText("world"))
+    prob_1.add_child(ast.Text("hello"))
+    prob_1.add_child(ast.Text("world"))
 
     prob_2 = copy.deepcopy(prob_1)
 

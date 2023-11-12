@@ -233,12 +233,12 @@ def _convert_subprob(env: Environment, convert):
 
 @_cmd_converter("textbf")
 def _convert_textbf(cmd: Command, convert):
-    return ast.BoldText(cmd.args[0].raw_contents)
+    return ast.Text(cmd.args[0].raw_contents, bold=True)
 
 
 @_cmd_converter("textit")
 def _convert_textit(cmd: Command, convert):
-    return ast.ItalicText(cmd.args[0].raw_contents)
+    return ast.Text(cmd.args[0].raw_contents, italic=True)
 
 
 # math ---------------------------------------------------------------------------------
@@ -403,7 +403,7 @@ def parse(
     # children:
     def convert(latex_node: Union[Command, Environment, str]) -> ast.Node:
         if isinstance(latex_node, str):
-            return ast.NormalText(latex_node)
+            return ast.Text(latex_node)
         elif isinstance(latex_node, Command):
             converters = cmd_converters
         elif isinstance(latex_node, Environment):
@@ -420,3 +420,5 @@ def parse(
     tree = convert(prob_node)
     assert isinstance(tree, ast.Problem)
     return tree
+
+

@@ -39,9 +39,7 @@ Problems
 Text
 ~~~~
 .. autoclass:: Paragraph
-.. autoclass:: NormalText
-.. autoclass:: BoldText
-.. autoclass:: ItalicText
+.. autoclass:: Text
 
 Math
 ~~~~
@@ -79,14 +77,14 @@ AST works.
 
     # create children and add them one-by-one
     para = ast.Paragraph()
-    para.add_child(ast.NormalText('Is "hello world" a common test phrase?'))
+    para.add_child(ast.Text('Is "hello world" a common test phrase?'))
 
     prob.add_child(para)
     prob.add_child(ast.TrueFalse("True"))
 
     # create children and add them all at once
     prob.add_child(ast.Solution(children=[
-        ast.NormalText("Yes, it is. In fact, it is "),
-        ast.BoldText("very"),
-        ast.NormalText(" common."),
+        ast.Text("Yes, it is. In fact, it is "),
+        ast.Text("very", bold=True),
+        ast.Text(" common."),
     ]))
