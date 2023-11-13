@@ -148,13 +148,17 @@ def _render_choice(node: ast.Choice, kind: str, render_child):
 @_renderer(ast.MultipleChoice)
 def _render_multiplechoice(node: ast.MultipleChoice, render_child):
     # radio buttons
-    contents = "\n".join(_render_choice(child, "radio") for child in node.children)
+    contents = "\n".join(
+        _render_choice(child, "radio", render_child) for child in node.children
+    )
     return f'<div class="multiple-choices"><form>{contents}</form></div>'
 
 
 @_renderer(ast.MultipleSelect)
 def _render_multipleselect(node: ast.MultipleSelect, render_child):
-    contents = "\n".join(_render_choice(child, "checkbox") for child in node.children)
+    contents = "\n".join(
+        _render_choice(child, "checkbox", render_child) for child in node.children
+    )
     return f'<div class="multiple-select">{contents}</div>'
 
 
