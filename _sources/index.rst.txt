@@ -8,6 +8,8 @@ Welcome to panprob's documentation!
 
 `panprob` is a Python package for converting between different problem formats.
 
+See this project's [GitHub repo](https://github.com/eldridgejm/panprob).
+
 Usage
 -----
 
