@@ -448,7 +448,7 @@ def test_inline_response_box():
             ast.InlineResponseBox(
                 children=[
                     ast.Text("some math: "),
-                    ast.InlineMath("f(x) \geq 42"),
+                    ast.InlineMath(r"f(x) \geq 42"),
                 ]
             ),
         ]
