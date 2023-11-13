@@ -35,7 +35,6 @@ class Node(ABC):
         """Human-readable representation of this node."""
         return f"{type(self).__name__}({self.__dict__!r})"
 
-
 class InternalNode(Node):
     """ABC for an internal node in the AST.
 

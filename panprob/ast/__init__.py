@@ -35,4 +35,4 @@ valid for their parent nodes -- if not, an exception is raised.
 
 """
 from ._types import *
-from . import util, postprocessors
+from . import  postprocessors
