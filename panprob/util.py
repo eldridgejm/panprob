@@ -80,7 +80,10 @@ def segment(items: Sequence, predicate: typing.Callable) -> typing.List[typing.L
     # ["a", 1, 2, 3, "b", "c", 4, 5]
     #    -> [sentinel, "a", 1, 2, 3, sentinel, "b", sentinel, "c", 4, 5]
 
-    # we have effectively completed our task: we just need to group by the
-    # sentinel value and filter out the groups that correspond to sentinels
+    # recall that itertools.groupby groups consecutive items that have the same
+    # key. In our case, the key is whether or not the item is a sentinel, and there
+    # will be a sentinel between each segment. So, if we group by the sentinel
+    # value, we will get groups that correspond to segments (and groups that correspond
+    # to sentinels, but we don't care about those).
     groups = itertools.groupby(items_with_sentinels(), lambda x: x is sentinel)
-    return [list(v) for is_sentinel, v in groups if not is_sentinel]
+    return [list(v) for (is_sentinel, v) in groups if not is_sentinel]
