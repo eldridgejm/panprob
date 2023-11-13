@@ -38,21 +38,21 @@ def segment(items: Sequence, predicate: typing.Callable) -> typing.List[typing.L
     >>> segment(["x", 1, 2, "a", 3, "b", 4], predicate)
     [["x", 1, 2], ["a", 3], ["b", 4]]
 
+    Example
+    -------
     If the first item in the sequence does not satisfy the predicate, the
     result will be the same as if there was a "break point" at the beginning
     of the sequence:
 
-    Example
-    -------
     >>> predicate = lambda x: isinstance(x, str)
     >>> segment([1, 2, "a", 3, "b", 4], predicate)
     [[1, 2], ["a", 3], ["b", 4]]
 
+    Example
+    -------
     If two or more consecutive items satisfy the predicate, they will not be
     grouped together:
 
-    Example
-    -------
     >>> predicate = lambda x: isinstance(x, str)
     >>> segment(["a", 1, 2, 3, "b", "c", 4, 5], predicate)
     [["a", 1, 2, 3], ["b"], ["c", 4, 5]]
