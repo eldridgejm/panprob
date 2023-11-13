@@ -431,6 +431,30 @@ def test_problem_with_tF():
     )
 
 
+def test_inline_response_box():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                The answer is: \inlineresponsebox[1in]{some math: $f(x) \geq 42$}
+            \end{prob}
+            """
+        )
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.Text("\n    The answer is: "),
+            ast.InlineResponseBox(
+                children=[
+                    ast.Text("some math: "),
+                    ast.InlineMath("f(x) \geq 42"),
+                ]
+            ),
+        ]
+    )
+
+
 # media ================================================================================
 
 

@@ -1,6 +1,7 @@
 """Renders a problem to HTML."""
 
 from textwrap import dedent
+from uuid import uuid4
 
 from .. import ast
 
@@ -162,6 +163,32 @@ def _render_multipleselect(node: ast.MultipleSelect, render_child):
     return f'<div class="multiple-select">{contents}</div>'
 
 
+@_renderer(ast.InlineResponseBox)
+def _render_inlineresponsebox(node: ast.InlineResponseBox, render_child):
+    uuid = str(uuid4())
+
+    answer = "\n".join(render_child(child) for child in node.children)
+
+    return dedent(
+        f"""
+        <span class="inline-response-box">
+            <span id="answer-{uuid}" style="display: none">{answer}</span>
+            <span id="button-{uuid}">
+                <button
+                    type="button"
+                    onclick="
+                        document.getElementById('answer-{uuid}').style.display = 'inline-block';
+                        document.getElementById('button-{uuid}').style.display = 'none'
+                    "
+                >
+                    Show Answer
+                </button>
+            </span>
+        </span>
+        """
+    )
+
+
 # media --------------------------------------------------------------------------------
 
 
@@ -174,6 +201,8 @@ def _render_imagefile(node: ast.ImageFile, render_child):
 
 def render(problem: ast.Problem, overrides=None) -> str:
     """Render a problem to HTML.
+
+    This render is capable of rendering all node types from :mod:`panprob.ast`.
 
     Parameters
     ----------

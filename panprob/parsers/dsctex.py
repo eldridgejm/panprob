@@ -337,6 +337,11 @@ def _convert_tF(cmd: Command, convert):
     return ast.TrueFalse(solution=False)
 
 
+@_cmd_converter("inlineresponsebox")
+def _convert_inlineresponsebox(cmd: Command, convert):
+    return ast.InlineResponseBox(children=[convert(c) for c in cmd.args[-1].contents])
+
+
 # parse() ==============================================================================
 
 
@@ -373,6 +378,10 @@ def parse(
     that can be used as a callback to recursively convert the children of the
     node, if necessary. The converter function should return a panprob AST
     node. See the documentation for examples.
+
+    The parser is not capable of accurately detecting the paragraph structure
+    in the source. To add paragraph breaks to the parsed problem post hoc, use
+    :func:`panprob.ast.postprocessors.paragraphize`.
 
     """
 

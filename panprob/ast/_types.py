@@ -35,6 +35,7 @@ class Node(ABC):
         """Human-readable representation of this node."""
         return f"{type(self).__name__}({self.__dict__!r})"
 
+
 class InternalNode(Node):
     """ABC for an internal node in the AST.
 
@@ -84,6 +85,8 @@ class LeafNode(Node):
 
 # AST node types =======================================================================
 
+# problems and subproblems -------------------------------------------------------------
+
 
 class Problem(InternalNode):
     """A problem.
@@ -113,6 +116,9 @@ class Subproblem(InternalNode):
     contain, except for other subproblems.
 
     """
+
+
+# text ---------------------------------------------------------------------------------
 
 
 class Paragraph(InternalNode):
@@ -150,6 +156,9 @@ class Text(LeafNode):
         self.italic = italic
 
 
+# math ---------------------------------------------------------------------------------
+
+
 class DisplayMath(LeafNode):
     """A block of text that should be typeset as display math.
 
@@ -182,6 +191,9 @@ class InlineMath(LeafNode):
     def __init__(self, latex: str):
         super().__init__()
         self.latex = latex
+
+
+# code ---------------------------------------------------------------------------------
 
 
 class Code(LeafNode):
@@ -264,6 +276,9 @@ class ImageFile(LeafNode):
         self.relative_path = relative_path
 
 
+# response areas and solutions ---------------------------------------------------------
+
+
 class MultipleChoice(InternalNode):
     """A multiple choice area.
 
@@ -323,6 +338,18 @@ class TrueFalse(LeafNode):
         self.solution = solution
 
 
+class InlineResponseBox(InternalNode):
+    """An inline response box.
+
+    Can contain the following node types:
+
+    - Text
+    - InlineMath
+    - InlineCode
+
+    """
+
+
 class Solution(InternalNode):
     """A solution to a problem.
 
@@ -342,6 +369,7 @@ Problem.allowed_child_types = (
     MultipleChoice,
     MultipleSelect,
     TrueFalse,
+    InlineResponseBox,
     Solution,
     Text,
     InlineMath,
@@ -353,6 +381,7 @@ Paragraph.allowed_child_types = (
     Text,
     InlineMath,
     InlineCode,
+    InlineResponseBox
 )
 
 # do not allow subproblems to contain subproblems
@@ -374,3 +403,5 @@ Choice.allowed_child_types = (
 )
 
 Solution.allowed_child_types = Choice.allowed_child_types
+
+InlineResponseBox.allowed_child_types = (Text, InlineMath, InlineCode)

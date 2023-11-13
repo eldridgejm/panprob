@@ -1,5 +1,5 @@
-:code:`panprob.ast`: Abstract Syntax Trees
-==========================================
+Abstract Syntax Trees
+=====================
 
 .. currentmodule:: panprob.ast
 
@@ -61,6 +61,7 @@ Response Areas
 .. autoclass:: MultipleChoice
 .. autoclass:: MultipleSelect
 .. autoclass:: Choice
+.. autoclass:: InlineResponseBox
 .. autoclass:: Solution
 
 
@@ -96,3 +97,5 @@ These "postprocessors" take an AST as input and (typically) modify it in some
 way.
 
 .. autofunction:: panprob.ast.postprocessors.paragraphize
+.. autofunction:: panprob.ast.postprocessors.copy_images
+.. autofunction:: panprob.ast.postprocessors.subsume_code
