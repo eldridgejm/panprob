@@ -65,13 +65,12 @@ def segment(items: Sequence, predicate: typing.Callable) -> typing.List[typing.L
     # place sentinels before each break point
     sentinel = object()
 
-    def insert_sentinels():
+    def items_with_sentinels():
         for item in items:
             if predicate(item):
                 yield sentinel
             yield item
 
-    items_with_sentinels = insert_sentinels()
 
     # at this point, our examples look like:
     # ["a", 1, 2, 3, "b", 1, 2, "c", 1, 2, 3, 4]
@@ -84,5 +83,5 @@ def segment(items: Sequence, predicate: typing.Callable) -> typing.List[typing.L
 
     # we have effectively completed our task: we just need to group by the
     # sentinel value and filter out the groups that correspond to sentinels
-    groups = itertools.groupby(items_with_sentinels, lambda x: x is sentinel)
+    groups = itertools.groupby(items_with_sentinels(), lambda x: x is sentinel)
     return [list(v) for is_sentinel, v in groups if not is_sentinel]
