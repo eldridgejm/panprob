@@ -71,7 +71,6 @@ def segment(items: Sequence, predicate: typing.Callable) -> typing.List[typing.L
                 yield sentinel
             yield item
 
-
     # at this point, our examples look like:
     # ["a", 1, 2, 3, "b", 1, 2, "c", 1, 2, 3, 4]
     #    -> [sentinel, "a", 1, 2, 3, sentinel, "b", 1, 2, sentinel, "c", 1, 2, 3, 4]
