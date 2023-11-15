@@ -54,24 +54,8 @@
             nativeBuildInputs = with python3Packages; [
               pytest
               sphinx
+              sphinx_rtd_theme
               pip
-
-              # shibuya sphinx theme
-              (
-                pkgs.python3Packages.buildPythonPackage rec {
-                  pname = "shibuya";
-                  version = "2023.3.1";
-                  name = "${pname}-${version}";
-                  src = pkgs.fetchFromGitHub {
-                    owner = "lepture";
-                    repo = "shibuya";
-                    rev = "${version}";
-                    sha256 = "sha256-Ckdhfof1bX7d0OeT5z8cisRjHkfsdRZz18hgHjzYSs8=";
-                  };
-                  format = "pyproject";
-                  nativeBuildInputs = with python3Packages; [sphinx];
-                }
-              )
             ];
             doCheck = true;
           }

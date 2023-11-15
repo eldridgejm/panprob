@@ -24,7 +24,7 @@ jobs:
           python3 -m pip install --upgrade pip
 
       - name: Install docs dependencies
-        run: pip install sphinx shibuya
+        run: pip install sphinx sphinx-rtd-theme
 
       - name: Install the package
         run: pip install .
