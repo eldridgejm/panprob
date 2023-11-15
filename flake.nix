@@ -32,8 +32,47 @@
                   doCheck = false;
                 }
               )
+
+              # marko
+              (
+                pkgs.python3Packages.buildPythonPackage rec {
+                  pname = "marko";
+                  version = "2.0.1";
+                  name = "${pname}-${version}";
+                  format = "pyproject";
+                  src = pkgs.fetchFromGitHub {
+                    owner = "frostming";
+                    repo = "marko";
+                    rev = "v${version}";
+                    sha256 = "sha256-4o+o5V6J+vthRqLWFFcmSSsyhVrkkJ6HZ2dCxJ+0KZM=";
+                  };
+                  nativeBuildInputs = with python3Packages; [pdm-pep517 pdm-backend];
+                  doCheck = false;
+                }
+              )
             ];
-            nativeBuildInputs = with python3Packages; [pytest sphinx sphinx_rtd_theme pip];
+            nativeBuildInputs = with python3Packages; [
+              pytest
+              sphinx
+              pip
+
+              # shibuya sphinx theme
+              (
+                pkgs.python3Packages.buildPythonPackage rec {
+                  pname = "shibuya";
+                  version = "2023.3.1";
+                  name = "${pname}-${version}";
+                  src = pkgs.fetchFromGitHub {
+                    owner = "lepture";
+                    repo = "shibuya";
+                    rev = "${version}";
+                    sha256 = "sha256-Ckdhfof1bX7d0OeT5z8cisRjHkfsdRZz18hgHjzYSs8=";
+                  };
+                  format = "pyproject";
+                  nativeBuildInputs = with python3Packages; [sphinx];
+                }
+              )
+            ];
             doCheck = true;
           }
     );

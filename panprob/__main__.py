@@ -15,7 +15,7 @@ def cli():
     return argparser.parse_args()
 
 
-EXT_TO_PARSER = {".tex": parsers.dsctex.parse}
+EXT_TO_PARSER = {".tex": parsers.dsctex.parse, ".md": parsers.gsmd.parse}
 EXT_TO_RENDERER = {".html": renderers.html.render}
 
 

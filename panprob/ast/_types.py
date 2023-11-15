@@ -129,6 +129,7 @@ class Paragraph(InternalNode):
     - Text
     - InlineMath
     - InlineCode
+    - ImageFile
 
     """
 
@@ -381,7 +382,8 @@ Paragraph.allowed_child_types = (
     Text,
     InlineMath,
     InlineCode,
-    InlineResponseBox
+    InlineResponseBox,
+    ImageFile,
 )
 
 # do not allow subproblems to contain subproblems

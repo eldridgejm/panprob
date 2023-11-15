@@ -1,1 +1,1 @@
-from . import dsctex
+from . import dsctex, gsmd
