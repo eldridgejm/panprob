@@ -78,4 +78,17 @@ you can define a converter function to convert this command to a
     def convert_python(node, children):
         return ast.InlineCode("python", "this")
 
+    latex = r"\python{x = 3 + 4}"
+
     tree = parse(latex, command_converters={"python": convert_python})
+
+Gradescope Markdown
+-------------------
+
+.. currentmodule:: panprob.parsers.gsmd
+
+.. automodule:: panprob.parsers.gsmd
+
+The main functionality of the module is provided by the :func:`parse` function:
+
+.. autofunction:: parse
