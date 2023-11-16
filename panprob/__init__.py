@@ -60,7 +60,7 @@ def convert(source: str, parser: str, renderer: str) -> str:
 
         \begin{prob}
 
-            This is a problem in Gradescope Markdown.
+            This problem was originally written in Gradescope Markdown.
 
             \begin{choices}
                 \correctchoice {
