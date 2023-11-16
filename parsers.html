@@ -62,7 +62,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="renderers.html">Renderers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ast.html">Abstract Syntax Trees</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
 </ul>
 
         </div>
@@ -91,10 +91,27 @@
              
   <section id="parsers">
 <h1>Parsers<a class="headerlink" href="#parsers" title="Link to this heading"></a></h1>
+<p><cite>panprob</cite> converts problems by first <em>parsing</em> them into an intermediate format (an
+abstract syntax tree, or AST) and then <em>rendering</em> that tree into the desired output
+format. The parsers provided by <cite>panprob</cite> are documented below.</p>
+<p>Note that most use cases do not require instantiating a parsers directly. Instead,
+you should use the <a class="reference internal" href="index.html#panprob.convert" title="panprob.convert"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.convert()</span></code></a> function, which does parsing and rendering
+in one step.</p>
 <section id="module-panprob.parsers.dsctex">
 <span id="dsctex"></span><h2>DSCTeX<a class="headerlink" href="#module-panprob.parsers.dsctex" title="Link to this heading"></a></h2>
-<p>Parser for problems written in the format defined by <cite>DSCTeX</cite>.</p>
-<p>See the <a class="reference external" href="https://eldridgejm.github.io/dsctex">DSCTeX documentation</a> for more
+<p>Parser for problems written in LaTeX with the <cite>DSCTeX</cite> package.</p>
+<p>A problem written with DSCTeX looks like the below:</p>
+<div class="highlight-latex notranslate"><div class="highlight"><pre><span></span><span class="k">\begin</span><span class="nb">{</span>problem<span class="nb">}</span>
+    What is the largest building at UCSD?
+
+    <span class="k">\begin</span><span class="nb">{</span>solution<span class="nb">}</span>
+        Geisel Library, probably.
+    <span class="k">\end</span><span class="nb">{</span>solution<span class="nb">}</span>
+<span class="k">\end</span><span class="nb">{</span>problem<span class="nb">}</span>
+</pre></div>
+</div>
+<p>DSCTeX also supports multiple choice problems, True/False, etc.
+See the <a class="reference external" href="https://eldridgejm.github.io/dsctex">DSCTeX documentation</a> for more
 information about the source format.</p>
 <p>The main functionality of the module is provided by the <a class="reference internal" href="#panprob.parsers.dsctex.parse" title="panprob.parsers.dsctex.parse"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse()</span></code></a> function:</p>
 <dl class="py function">
@@ -116,6 +133,10 @@ into panprob AST nodes. See below for the expected signature of these</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem">panprob.ast.Problem</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>panprob.exceptions.Error</strong> – If the source cannot be parsed for some reason. For example, if it
+    contains an unrecognized command or environment.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -267,7 +288,7 @@ was a required argument or an optional argument, respectively.</p>
 
 <p>Once this tree representing the LaTeX document has been constructed, the parser
 then walks through it, looking for commands and environments that it knows how
-to “convert” to <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code></a> nodes. This module defines numerous
+to “convert” to <code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code> nodes. This module defines numerous
 “converter” functions for this purpose, but you can define your own, overriding
 or extending the defaults.</p>
 <p>In short, a “converter” is a function that takes two arguments:</p>
@@ -275,7 +296,7 @@ or extending the defaults.</p>
 <li><p>a <a class="reference internal" href="#panprob.parsers.dsctex.Command" title="panprob.parsers.dsctex.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> or <a class="reference internal" href="#panprob.parsers.dsctex.Environment" title="panprob.parsers.dsctex.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> object.</p></li>
 <li><p>a callback function that can be used to convert the children of the node</p></li>
 </ol>
-<p>It should return a node type from <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>.</p>
+<p>It should return a node type from <code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
 <section id="example-python-command">
 <h4>Example - <code class="code docutils literal notranslate"><span class="pre">\python</span></code> command<a class="headerlink" href="#example-python-command" title="Link to this heading"></a></h4>
 <p>Suppose your LaTeX source uses a custom command called <code class="code docutils literal notranslate"><span class="pre">\python</span></code> to
@@ -317,6 +338,9 @@ short answer boxes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem">ast.Problem</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>panprob.exceptions.Error</strong> – If the source cannot be parsed for some known reason.</p>
 </dd>
 </dl>
 </dd></dl>

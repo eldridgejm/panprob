@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Abstract Syntax Trees" href="ast.html" />
+    <link rel="next" title="Extending panprob" href="ast.html" />
     <link rel="prev" title="Parsers" href="parsers.html" /> 
 </head>
 
@@ -50,9 +50,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#panprob.renderers.html.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-panprob.renderers.dsctex">DSCTeX</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#panprob.renderers.dsctex.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ast.html">Abstract Syntax Trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-panprob.renderers.gsmd">Gradescope Markdown</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#panprob.renderers.gsmd.render"><code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
 </ul>
 
         </div>
@@ -81,6 +89,10 @@
              
   <section id="renderers">
 <h1>Renderers<a class="headerlink" href="#renderers" title="Link to this heading"></a></h1>
+<p>As described in the previous section, <cite>panprob</cite> converts problems by first
+<em>parsing</em> them into an intermediate format (an abstract syntax tree, or AST)
+and then <em>rendering</em> that tree into the desired output format. The renderers
+provided by <cite>panprob</cite> are described below.</p>
 <section id="module-panprob.renderers.html">
 <span id="html"></span><h2>HTML<a class="headerlink" href="#module-panprob.renderers.html" title="Link to this heading"></a></h2>
 <p>Renders a problem to HTML.</p>
@@ -88,7 +100,7 @@
 <dt class="sig sig-object py" id="panprob.renderers.html.render">
 <span class="sig-prename descclassname"><span class="pre">panprob.renderers.html.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast._types.Problem"><span class="pre">Problem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overrides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.renderers.html.render" title="Link to this definition"></a></dt>
 <dd><p>Render a problem to HTML.</p>
-<p>This render is capable of rendering all node types from <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>.</p>
+<p>This render is capable of rendering all node types from <code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -118,6 +130,80 @@ node renderer for each child node.</p></li>
 </dd></dl>
 
 </section>
+<section id="module-panprob.renderers.dsctex">
+<span id="dsctex"></span><h2>DSCTeX<a class="headerlink" href="#module-panprob.renderers.dsctex" title="Link to this heading"></a></h2>
+<p>Renders a problem to DSCTeX.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="panprob.renderers.dsctex.render">
+<span class="sig-prename descclassname"><span class="pre">panprob.renderers.dsctex.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast._types.Problem"><span class="pre">Problem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overrides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.renderers.dsctex.render" title="Link to this definition"></a></dt>
+<dd><p>Render a problem to a DSCTeX problem in LaTeX.</p>
+<p>This render is capable of rendering all node types from <code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>problem</strong> (<a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem"><em>ast.Problem</em></a>) – The problem to render.</p></li>
+<li><p><strong>overrides</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary mapping node types to functions that render them. If a node type
+is not in this dictionary, the default renderer is used. See below for the
+expected signature of these functions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The problem rendered as a LaTeX string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>A renderer function is called with two arguments:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>The node to render.</p></li>
+<li><p>A function that recursively renders a node to LaTeX by choosing the correct
+node renderer for each child node.</p></li>
+</ol>
+</div></blockquote>
+<p>It is expected to return an LaTeX string.</p>
+</dd></dl>
+
+</section>
+<section id="module-panprob.renderers.gsmd">
+<span id="gradescope-markdown"></span><h2>Gradescope Markdown<a class="headerlink" href="#module-panprob.renderers.gsmd" title="Link to this heading"></a></h2>
+<p>Renders a problem to Gradescope markdown.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="panprob.renderers.gsmd.render">
+<span class="sig-prename descclassname"><span class="pre">panprob.renderers.gsmd.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast._types.Problem"><span class="pre">Problem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overrides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.renderers.gsmd.render" title="Link to this definition"></a></dt>
+<dd><p>Render a problem in Gradescope markdown.</p>
+<p>This render is capable of rendering all node types from <code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>problem</strong> (<a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem"><em>ast.Problem</em></a>) – The problem to render.</p></li>
+<li><p><strong>overrides</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary mapping node types to functions that render them. If a node type
+is not in this dictionary, the default renderer is used. See below for the
+expected signature of these functions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The problem rendered as a markdown string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>A renderer function is called with two arguments:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>The node to render.</p></li>
+<li><p>A function that recursively renders a node to markdown by choosing the correct
+node renderer for each child node.</p></li>
+</ol>
+</div></blockquote>
+<p>It is expected to return an markdown string.</p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -125,7 +211,7 @@ node renderer for each child node.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="parsers.html" class="btn btn-neutral float-left" title="Parsers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ast.html" class="btn btn-neutral float-right" title="Abstract Syntax Trees" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ast.html" class="btn btn-neutral float-right" title="Extending panprob" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
