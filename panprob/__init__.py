@@ -46,7 +46,7 @@ def convert(source: str, parser: str, renderer: str) -> str:
         In [1]: import panprob
 
         In [2]: source = '''
-           ...: This is a problem in Gradescope Markdown.
+           ...: This problem was originally written in Gradescope Markdown.
            ...:
            ...: (x) True
            ...: ( ) False
