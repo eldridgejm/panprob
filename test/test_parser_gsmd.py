@@ -3,6 +3,8 @@ from textwrap import dedent, indent
 from panprob.parsers.gsmd import parse
 from panprob import ast
 
+from pytest import raises
+
 
 def print_ast(node, indent=0):
     print("  " * indent + type(node).__name__)
@@ -134,15 +136,24 @@ def test_image():
     expected = ast.Problem(
         children=[
             ast.Text("\n"),
-            ast.Paragraph(
-                children=[
-                    ast.ImageFile("images/foo.png"),
-                ]
-            ),
+            ast.ImageFile("images/foo.png"),
+            ast.Text("\n"),
         ]
     )
 
     assert parse(md) == expected
+
+
+def test_inline_image_raises_error():
+    """We don't support inline images in PanProb."""
+    md = dedent(
+        """
+        This is an inline image: ![alt text](images/foo.png)
+        """
+    )
+
+    with raises(ValueError):
+        parse(md)
 
 
 def test_inline_math():

@@ -2,8 +2,9 @@
 
 import argparse
 import pathlib
+import sys
 
-from . import parsers, renderers, ast
+from . import parsers, renderers, ast, exceptions
 
 
 def cli():
@@ -16,7 +17,11 @@ def cli():
 
 
 EXT_TO_PARSER = {".tex": parsers.dsctex.parse, ".md": parsers.gsmd.parse}
-EXT_TO_RENDERER = {".html": renderers.html.render}
+EXT_TO_RENDERER = {
+    ".html": renderers.html.render,
+    ".tex": renderers.dsctex.render,
+    ".md": renderers.gsmd.render,
+}
 
 
 def main():
@@ -26,12 +31,21 @@ def main():
     render = EXT_TO_RENDERER[args.output.suffix]
 
     with args.input.open() as f:
-        tree = parse(f.read())
+        contents = f.read()
 
-    tree = ast.postprocessors.paragraphize(tree)
+    try:
+        tree = parse(contents)
+        tree = ast.postprocessors.paragraphize(tree)
+        out = render(tree)
+    except exceptions.Error as exc:
+        print("Error:", exc)
+        sys.exit(1)
+    except Exception as exc:
+        print("There was an unexpected error:", exc)
+        raise
 
     with args.output.open("w") as f:
-        f.write(render(tree))
+        f.write(out)
 
 
 if __name__ == "__main__":

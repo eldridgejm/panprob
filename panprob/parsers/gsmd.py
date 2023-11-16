@@ -10,7 +10,7 @@ For details about this format, see the `Gradescope documentation
 
 """
 
-from .. import ast
+from .. import ast, exceptions
 
 import typing
 
@@ -240,6 +240,34 @@ class _InlineResponseBox(marko.block.BlockElement):
         return cls(children)
 
 
+class _BlockImage(marko.block.BlockElement):
+    """A marko element for a block image.
+
+    The panprob AST does not support inline images. Therefore, we detect block
+    images and handle them as expected, but we will later raise an error if we
+    see an inline image.
+
+    Attributes
+    ----------
+    relative_path : str
+        The relative path to the image file.
+
+    """
+
+    def __init__(self, relative_path):
+        self.relative_path = relative_path
+
+    @classmethod
+    def match(cls, source):
+        return source.expect_re(r"\!\[(.*)\]\((.*)\)")
+
+    @classmethod
+    def parse(cls, source):
+        match = source.match
+        source.consume()
+        return cls(match.group(2))
+
+
 # parser setup -------------------------------------------------------------------------
 
 _MARKO_PARSER = marko.parser.Parser()
@@ -249,6 +277,7 @@ _MARKO_PARSER.add_element(_Solution)
 _MARKO_PARSER.add_element(_MultipleChoice)
 _MARKO_PARSER.add_element(_MultipleSelect)
 _MARKO_PARSER.add_element(_InlineResponseBox)
+_MARKO_PARSER.add_element(_BlockImage)
 
 # converters ===========================================================================
 
@@ -339,9 +368,14 @@ def _convert_inline_math(marko_element, convert):
 # media --------------------------------------------------------------------------------
 
 
-@_converter(marko.inline.Image)
+@_converter(_BlockImage)
 def _convert_image(marko_element, convert):
-    return ast.ImageFile(marko_element.dest)
+    return ast.ImageFile(marko_element.relative_path)
+
+
+@_converter(marko.inline.Image)
+def _convert_inline_image(marko_element, convert):
+    raise ValueError("Inline images are not supported")
 
 
 # response areas and solutions ---------------------------------------------------------
@@ -400,15 +434,21 @@ def parse(md: str) -> ast.Problem:
     ast.Problem
         The parsed problem.
 
+    Raises
+    ------
+    panprob.exceptions.Error
+        If the source cannot be parsed for some known reason.
+
     """
     marko_tree = _MARKO_PARSER.parse(md)
 
     def _convert_marko_element(marko_element):
         """Recursively convert a Marko node to an AST node."""
         if type(marko_element) not in _CONVERTERS:
-            raise NotImplementedError(
-                f"Conversion of Marko node {marko_element} to AST node not implemented"
+            raise exceptions.Error(
+                f"Gradescope markdown parser found unsupported node {marko_element}"
             )
+
         converter = _CONVERTERS[type(marko_element)]
         return converter(marko_element, _convert_marko_element)
 

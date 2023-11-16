@@ -1,7 +1,9 @@
 from textwrap import dedent, indent
 
 from panprob.parsers.dsctex import parse
-from panprob import ast
+from panprob import ast, exceptions
+
+from pytest import raises
 
 # problems =============================================================================
 
@@ -517,3 +519,30 @@ def test_extending_with_new_converter():
             ast.InlineCode("python", "this"),
         ]
     )
+
+
+# error handling =======================================================================
+
+
+def test_raises_when_an_unknown_command_is_used():
+    latex = r"""
+    \begin{prob}
+        \unknown{this}
+    \end{prob}
+    """
+
+    with raises(exceptions.Error):
+        parse(latex)
+
+
+def test_raises_when_an_unknown_environment_is_used():
+    latex = r"""
+    \begin{prob}
+        \begin{unknown}
+            this
+        \end{unknown}
+    \end{prob}
+    """
+
+    with raises(exceptions.Error):
+        parse(latex)

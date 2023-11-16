@@ -1,5 +1,18 @@
-"""Parser for problems written in the format defined by `DSCTeX`.
+r"""Parser for problems written in LaTeX with the `DSCTeX` package.
 
+A problem written with DSCTeX looks like the below:
+
+.. code:: latex
+
+    \begin{problem}
+        What is the largest building at UCSD?
+
+        \begin{solution}
+            Geisel Library, probably.
+        \end{solution}
+    \end{problem}
+
+DSCTeX also supports multiple choice problems, True/False, etc.
 See the `DSCTeX documentation <https://eldridgejm.github.io/dsctex>`_ for more
 information about the source format.
 
@@ -11,7 +24,7 @@ import textwrap
 
 import TexSoup
 
-from .. import ast, util
+from .. import ast, util, exceptions
 
 
 # To make it easy to extend, this module follows a two-step process to parse
@@ -366,6 +379,12 @@ def parse(
     panprob.ast.Problem
         The parsed problem.
 
+    Raises
+    ------
+    panprob.exceptions.Error
+        If the source cannot be parsed for some reason. For example, if it
+        contains an unrecognized command or environment.
+
     Notes
     -----
     The default command and environment converters are defined in the
@@ -396,10 +415,12 @@ def parse(
     try:
         [prob_node] = latex_ast.contents
     except ValueError:
-        raise ValueError("The root of the LaTeX AST must have exactly one child.")
+        raise exceptions.Error(
+            "The source must contain exactly one problem environment."
+        )
 
     if not (isinstance(prob_node, Environment) and prob_node.name == "prob"):
-        raise ValueError("The problem must be wrapped in a `prob` environment.")
+        raise exceptions.Error("The problem must be wrapped in a `prob` environment.")
 
     # next, we recursively convert these LaTeX nodes into panprob AST nodes.
     # default converters are defined above, but the user can override / extend them
@@ -418,10 +439,14 @@ def parse(
         elif isinstance(latex_node, Environment):
             converters = env_converters
         else:
-            raise ValueError(f"Unknown type: {type(latex_node)}")
+            raise exceptions.Error(f"Unknown type: {type(latex_node)}")
 
         if latex_node.name not in converters:
-            raise ValueError(f"Unknown {type(latex_node).__name__}: {latex_node.name}")
+            msg = (
+                "DSCTeX parser encountered unsupported LaTeX "
+                f"{type(latex_node).__name__} '{latex_node.name}'"
+            )
+            raise exceptions.Error(msg)
 
         # we pass this
         return converters[latex_node.name](latex_node, convert)

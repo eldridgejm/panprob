@@ -1,6 +1,14 @@
 Parsers
 =======
 
+`panprob` converts problems by first *parsing* them into an intermediate format (an
+abstract syntax tree, or AST) and then *rendering* that tree into the desired output
+format. The parsers provided by `panprob` are documented below.
+
+Note that most use cases do not require instantiating a parsers directly. Instead,
+you should use the :func:`panprob.convert` function, which does parsing and rendering
+in one step.
+
 DSCTeX
 ------
 
