@@ -337,10 +337,21 @@ post-processing step is run that converts all <a class="reference internal" href
 <a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a> nodes by merging or splitting them as necessary. This
 post-processing step is implemented in the
 <a class="reference internal" href="postprocessors.html#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a> function.</p>
-<p>A <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> node can have one or more children. If it has more than one
-child, it is implicit that there is a paragraph break between each child.
-If there is only one child, it may be merged into a paragraph with text
-that comes before or after in the AST.</p>
+<p>A <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> node can have one or more children. A forced paragraph
+break is indicated by a <a class="reference internal" href="#panprob.ast.ParBreak" title="panprob.ast.ParBreak"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParBreak</span></code></a> node. For example, the string</p>
+<div class="highlight-latex notranslate"><div class="highlight"><pre><span></span>This is a single paragraph.
+
+And this is another.
+</pre></div>
+</div>
+<p>Can be represented in a <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Blob</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;This is a single paragraph.&quot;</span><span class="p">),</span>
+    <span class="n">ParBreak</span><span class="p">(),</span>
+    <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;And this is another.&quot;</span><span class="p">)</span>
+<span class="p">])</span>
+</pre></div>
+</div>
 <p>A <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> can contain the following node types:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a></p></li>
