@@ -220,10 +220,24 @@ class Blob(InternalNode):
     post-processing step is implemented in the
     :func:`panprob.postprocessors.paragraphize` function.
 
-    A :class:`Blob` node can have one or more children. If it has more than one
-    child, it is implicit that there is a paragraph break between each child.
-    If there is only one child, it may be merged into a paragraph with text
-    that comes before or after in the AST.
+    A :class:`Blob` node can have one or more children. A forced paragraph
+    break is indicated by a :class:`ParBreak` node. For example, the string
+
+    .. code:: latex
+
+        This is a single paragraph.
+
+        And this is another.
+
+    Can be represented in a :class:`Blob` as:
+
+    .. code:: python
+
+        Blob(children=[
+            Text("This is a single paragraph."),
+            ParBreak(),
+            Text("And this is another.")
+        ])
 
     A :class:`Blob` can contain the following node types:
 
