@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Extending panprob &mdash; panprob 0.0.0 documentation</title>
+  <title>Extending panprob &mdash; panprob 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,13 +13,13 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=7026087e"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Renderers" href="renderers.html" /> 
+    <link rel="prev" title="Exceptions" href="exceptions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,6 +45,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="renderers.html">Renderers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessors.html">Postprocessors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Extending <cite>panprob</cite></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#abstract-syntax-trees">Abstract Syntax Trees</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#abstract-base-classes">Abstract Base Classes</a><ul>
@@ -53,7 +55,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#panprob.ast.LeafNode"><code class="docutils literal notranslate"><span class="pre">LeafNode</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#concrete-nodes">Concrete Nodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#concrete-node-types">Concrete Node Types</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#problems">Problems</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#text">Text</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#math">Math</a></li>
@@ -63,12 +65,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#postprocessors">Postprocessors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#panprob.ast.postprocessors.paragraphize"><code class="docutils literal notranslate"><span class="pre">paragraphize()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#panprob.ast.postprocessors.copy_images"><code class="docutils literal notranslate"><span class="pre">copy_images()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#panprob.ast.postprocessors.subsume_code"><code class="docutils literal notranslate"><span class="pre">subsume_code()</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#writing-a-new-parser-or-renderer">Writing a New Parser or Renderer</a></li>
@@ -108,20 +104,20 @@ abstract syntax tree (AST) that <cite>panprob</cite> uses to represent problems
 internally. Your parser should take a problem in some format and convert it
 into an AST, and your renderer should take an AST and convert it to text.</p>
 <section id="abstract-syntax-trees">
-<h2>Abstract Syntax Trees<a class="headerlink" href="#abstract-syntax-trees" title="Link to this heading"></a></h2>
+<span id="module-panprob.ast"></span><h2>Abstract Syntax Trees<a class="headerlink" href="#abstract-syntax-trees" title="Link to this heading"></a></h2>
 <p>Abstractly, a problem is made up of “components” such as images, paragraphs of
 text, response areas, and so forth. Representing a problem as an AST of Python
 objects does three things:</p>
 <blockquote>
-<div><p>1) It defines a canonical problem format, and consequently determines the
-common set of components that any problem format should support.</p>
-<ol class="arabic simple" start="2">
+<div><ol class="arabic simple">
+<li><p>It defines a canonical problem format, and consequently determines the
+common set of components that any problem format should support.</p></li>
 <li><p>It allows us to more easily manipulate problems programmatically.</p></li>
-</ol>
-<p>3) It saves us work when converting between one problem format to another.
+<li><p>It saves us work when converting between one problem format to another.
 Instead of writing a separate “transformer” for every combination of source
 format and output format, we only need to write a parser for each input
-format and a renderer for each output format.</p>
+format and a renderer for each output format.</p></li>
+</ol>
 </div></blockquote>
 <p>Each node in the AST represents a component of a problem, such as an image, a
 response area, a paragraph of text, and so forth. This module provides Python
@@ -139,7 +135,6 @@ a multiple choice problem cannot contain a subproblem. To enforce this, each
 internal node type has a list of the types of nodes that it can contain. When
 the AST is constructed, the parser checks to make sure that child nodes are
 valid for their parent nodes – if not, an exception is raised.</p>
-<p>“””</p>
 <section id="abstract-base-classes">
 <h3>Abstract Base Classes<a class="headerlink" href="#abstract-base-classes" title="Link to this heading"></a></h3>
 <p>Every node in the tree is a derivative of the <a class="reference internal" href="#panprob.ast.Node" title="panprob.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a> base class, which provides
@@ -152,13 +147,19 @@ printing a human-readable representation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="panprob.ast.Node.__eq__">
 <span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.Node.__eq__" title="Link to this definition"></a></dt>
-<dd><p>Determine if this node is equal to the other.</p>
+<dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="panprob.ast.Node.__repr__">
 <span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.Node.__repr__" title="Link to this definition"></a></dt>
-<dd><p>Human-readable representation of this node.</p>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panprob.ast.Node.prettify">
+<span class="sig-name descname"><span class="pre">prettify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.ast.Node.prettify" title="Link to this definition"></a></dt>
+<dd><p>Return a pretty-printed string representation of the node.</p>
 </dd></dl>
 
 </dd></dl>
@@ -168,17 +169,6 @@ printing a human-readable representation.</p>
 <dt class="sig sig-object py" id="panprob.ast.InternalNode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">InternalNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.InternalNode" title="Link to this definition"></a></dt>
 <dd><p>ABC for an internal node in the AST.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="panprob.ast.InternalNode.children">
-<span class="sig-name descname"><span class="pre">children</span></span><a class="headerlink" href="#panprob.ast.InternalNode.children" title="Link to this definition"></a></dt>
-<dd><p>The children of this node.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple of <a class="reference internal" href="#panprob.ast.Node" title="panprob.ast.Node">Node</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="panprob.ast.InternalNode.allowed_child_types">
 <span class="sig-name descname"><span class="pre">allowed_child_types</span></span><a class="headerlink" href="#panprob.ast.InternalNode.allowed_child_types" title="Link to this definition"></a></dt>
@@ -190,18 +180,23 @@ printing a human-readable representation.</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="panprob.ast.InternalNode.children">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#panprob.ast.InternalNode.children" title="Link to this definition"></a></dt>
+<dd><p>The children of this node.</p>
+<p>This attribute can be set in the usual way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">node</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="n">child1</span><span class="p">,</span> <span class="n">child2</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When it is set, each child is checked to ensure that it is a valid type for this
+node. If it is not, an <a class="reference internal" href="exceptions.html#panprob.exceptions.IllegalChild" title="panprob.exceptions.IllegalChild"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.exceptions.IllegalChild</span></code></a>
+exception is raised.</p>
+</dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="panprob.ast.InternalNode.add_child">
-<span class="sig-name descname"><span class="pre">add_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.InternalNode.add_child" title="Link to this definition"></a></dt>
-<dd><p>Add a child node, checking to see if it’s a valid type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="#panprob.ast.Node" title="panprob.ast.Node"><em>Node</em></a>) – The node to add.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>IllegalChild</strong> – If the child is not a valid type for this parent.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="panprob.ast.InternalNode.prettify">
+<span class="sig-name descname"><span class="pre">prettify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.ast.InternalNode.prettify" title="Link to this definition"></a></dt>
+<dd><p>Return a pretty string representation of the node.</p>
 </dd></dl>
 
 </dd></dl>
@@ -211,11 +206,17 @@ printing a human-readable representation.</p>
 <dt class="sig sig-object py" id="panprob.ast.LeafNode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">LeafNode</span></span><a class="headerlink" href="#panprob.ast.LeafNode" title="Link to this definition"></a></dt>
 <dd><p>ABC for a leaf node in the AST.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="panprob.ast.LeafNode.prettify">
+<span class="sig-name descname"><span class="pre">prettify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.LeafNode.prettify" title="Link to this definition"></a></dt>
+<dd><p>Return a pretty string representation of the node.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
-<section id="concrete-nodes">
-<h3>Concrete Nodes<a class="headerlink" href="#concrete-nodes" title="Link to this heading"></a></h3>
+<section id="concrete-node-types">
+<h3>Concrete Node Types<a class="headerlink" href="#concrete-node-types" title="Link to this heading"></a></h3>
 <p>These node types represent problem components, such as paragraphs, response
 areas, images, and so forth.</p>
 <section id="problems">
@@ -226,18 +227,16 @@ areas, images, and so forth.</p>
 <dd><p>A problem.</p>
 <p>Can contain the following node types:</p>
 <ul class="simple">
-<li><p>Subproblem</p></li>
-<li><p>Code</p></li>
-<li><p>DisplayMath</p></li>
-<li><p>ImageFile</p></li>
-<li><p>MultipleChoice</p></li>
-<li><p>MultipleSelect</p></li>
-<li><p>TrueFalse</p></li>
-<li><p>Solution</p></li>
-<li><p>Text</p></li>
-<li><p>InlineMath</p></li>
-<li><p>InlineCode</p></li>
-<li><p>Paragraph</p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Subproblem" title="panprob.ast.Subproblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">Subproblem</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.DisplayMath" title="panprob.ast.DisplayMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">DisplayMath</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Code" title="panprob.ast.Code"><code class="xref py py-class docutils literal notranslate"><span class="pre">Code</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.ImageFile" title="panprob.ast.ImageFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageFile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Solution" title="panprob.ast.Solution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Solution</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.MultipleChoice" title="panprob.ast.MultipleChoice"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleChoice</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.MultipleSelect" title="panprob.ast.MultipleSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleSelect</span></code></a></p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TrueFalse</span></code></p></li>
 </ul>
 </dd></dl>
 
@@ -258,18 +257,29 @@ contain, except for other subproblems.</p>
 <dd><p>A paragraph of text.</p>
 <p>Can contain the following node types:</p>
 <ul class="simple">
-<li><p>Text</p></li>
-<li><p>InlineMath</p></li>
-<li><p>InlineCode</p></li>
-<li><p>InlineResponseBox</p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineMath" title="panprob.ast.InlineMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineMath</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineResponseBox" title="panprob.ast.InlineResponseBox"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResponseBox</span></code></a></p></li>
 </ul>
+<p>It can be difficult for the parser to know where a paragraph should be
+created during parse time. Rather, it is often easier to infer this <em>post
+hoc</em>, after the full AST has been built. This can be done by placing text into
+<a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> nodes at parse time, and then converting them into
+<a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a> nodes with the <a class="reference internal" href="postprocessors.html#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a>
+function; see their documentation for more details.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="panprob.ast.Text">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">Text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">italic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.Text" title="Link to this definition"></a></dt>
-<dd><p>Text, optionally bold, and/or italic.</p>
-<p>A leaf node.</p>
+<dd><p>Text, optionally bold and/or italic.</p>
+<p>Upon passing the text to the constructor, all newlines are replaced with
+spaces. All repeated whitespace is replaced with a single space.</p>
+<p>The text cannot be empty, and it cannot only be whitespace. If either of
+these conditions are violated, an <code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code> will be raised.</p>
+<p>A <a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> node is a leaf node.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="panprob.ast.Text.text">
 <span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#panprob.ast.Text.text" title="Link to this definition"></a></dt>
@@ -303,6 +313,78 @@ contain, except for other subproblems.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="panprob.ast.Blob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">Blob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.Blob" title="Link to this definition"></a></dt>
+<dd><p>A special node type that is used to hold inline content that should be
+placed into a <a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a> after the AST has been built. Parsers
+should remove all <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> nodes from the AST after parsing and before
+returning the AST to the caller. Renderers should not expect to encounter
+any <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> nodes in the AST.</p>
+<p><a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> and inline content, such as <a class="reference internal" href="#panprob.ast.InlineMath" title="panprob.ast.InlineMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineMath</span></code></a>,
+<a class="reference internal" href="#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code></a>, and <a class="reference internal" href="#panprob.ast.InlineResponseBox" title="panprob.ast.InlineResponseBox"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResponseBox</span></code></a>, cannot appear directly
+under, e.g., a <a class="reference internal" href="#panprob.ast.Problem" title="panprob.ast.Problem"><code class="xref py py-class docutils literal notranslate"><span class="pre">Problem</span></code></a> in an AST; they must instead be contained
+within a <a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a>. However, it can be difficult for the parser to
+know where a paragraph should be created during parse time. Rather, it is
+often easier to infer this <em>post hoc</em>, after the full AST has been built.</p>
+<p>The <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> special node type exists to enable such a <em>post hoc</em>
+approach to creating paragraphs. Instead of placing text directly into a
+<a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a> during parsing, the parser puts one or more pieces of
+text into a <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a>. Then, after the AST has been created, a
+post-processing step is run that converts all <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> nodes into
+<a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a> nodes by merging or splitting them as necessary. This
+post-processing step is implemented in the
+<a class="reference internal" href="postprocessors.html#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a> function.</p>
+<p>A <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> node can have one or more children. If it has more than one
+child, it is implicit that there is a paragraph break between each child.
+If there is only one child, it may be merged into a paragraph with text
+that comes before or after in the AST.</p>
+<p>A <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> can contain the following node types:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineMath" title="panprob.ast.InlineMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineMath</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineResponseBox" title="panprob.ast.InlineResponseBox"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResponseBox</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.ParBreak" title="panprob.ast.ParBreak"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParBreak</span></code></a></p></li>
+</ul>
+<p class="rubric">Example</p>
+<p>For an example of where one might use a <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a>, consider the LaTeX
+string:</p>
+<div class="highlight-latex notranslate"><div class="highlight"><pre><span></span>This is a <span class="k">\textbf</span><span class="nb">{</span>single<span class="nb">}</span> paragraph.
+
+And this is another.
+</pre></div>
+</div>
+<p>A LaTeX parser may parse this in three pieces: 1) a string containing the
+text <code class="code docutils literal notranslate"><span class="pre">&quot;This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">&quot;</span></code>, 2) an inline node containing the
+<code class="code docutils literal notranslate"><span class="pre">\textbf{single}</span></code> command, and 3) a string containing the rest:
+<code class="code docutils literal notranslate"><span class="pre">&quot;paragraph\n\nAnd</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">another.&quot;</span></code>. In the final AST, we want these three pieces
+to be in <em>two</em> paragraphs: the first containing three <a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a>
+nodes for <code class="code docutils literal notranslate"><span class="pre">&quot;This</span> <span class="pre">is</span> <span class="pre">a&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;single&quot;</span></code> (in bold), and <code class="code docutils literal notranslate"><span class="pre">&quot;paragraph.&quot;</span></code>,
+and the second paragraph consisting of a single <a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> node for
+<code class="code docutils literal notranslate"><span class="pre">&quot;And</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">another.&quot;</span></code>.</p>
+<p>Instead of inferring these two paragraphs during parsing, the parser
+instead might create three <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> nodes: one for each piece of text
+produced by the parser. During postprocessing, the blobs will be “exploded”
+into their consituents which are then re-formed into paragraphs as necessary.</p>
+<p>When placing text into a <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a>, the parser should break the text
+into pieces at paragraph breaks. In this example, the first blob will
+contain a single child node: a <a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> node containing the text
+<code class="code docutils literal notranslate"><span class="pre">&quot;This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">&quot;</span></code>. The second blob will contain a single child node: a
+<a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> node containing the text <code class="code docutils literal notranslate"><span class="pre">&quot;single&quot;</span></code> (in bold). The
+third blob will contain two child nodes: a <a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> node containing
+the text <code class="code docutils literal notranslate"><span class="pre">&quot;paragraph.&quot;</span></code> and a <a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a> node containing the text
+<code class="code docutils literal notranslate"><span class="pre">&quot;And</span> <span class="pre">this</span> <span class="pre">is</span> <span class="pre">another.&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="panprob.ast.ParBreak">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">ParBreak</span></span><a class="headerlink" href="#panprob.ast.ParBreak" title="Link to this definition"></a></dt>
+<dd><p>A paragraph break.</p>
+<p>This special node is meant to only be used in <a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a> nodes. It
+is not meant to be used in the final AST that is returned to the caller.</p>
 </dd></dl>
 
 </section>
@@ -465,14 +547,14 @@ highlighting.</p>
 <dt class="sig sig-object py" id="panprob.ast.MultipleChoice">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">MultipleChoice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.MultipleChoice" title="Link to this definition"></a></dt>
 <dd><p>A multiple choice area.</p>
-<p>Can contain Choice nodes.</p>
+<p>Can contain <a class="reference internal" href="#panprob.ast.Choice" title="panprob.ast.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a> nodes.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="panprob.ast.MultipleSelect">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">MultipleSelect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.MultipleSelect" title="Link to this definition"></a></dt>
 <dd><p>A select-all-that-apply area in a question.</p>
-<p>Can contain Choice nodes.</p>
+<p>Can contain <a class="reference internal" href="#panprob.ast.Choice" title="panprob.ast.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Choice</span></code></a> nodes.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -481,14 +563,12 @@ highlighting.</p>
 <dd><p>A choice within a multiple choice question.</p>
 <p>Can contain the following node types:</p>
 <ul class="simple">
-<li><p>Text</p></li>
-<li><p>InlineMath</p></li>
-<li><p>DisplayMath</p></li>
-<li><p>Code</p></li>
-<li><p>InlineCode</p></li>
-<li><p>CodeFile</p></li>
-<li><p>ImageFile</p></li>
-<li><p>Paragraph</p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.ImageFile" title="panprob.ast.ImageFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageFile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Code" title="panprob.ast.Code"><code class="xref py py-class docutils literal notranslate"><span class="pre">Code</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.CodeFile" title="panprob.ast.CodeFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodeFile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.DisplayMath" title="panprob.ast.DisplayMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">DisplayMath</span></code></a></p></li>
 </ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="panprob.ast.Choice.correct">
@@ -509,9 +589,9 @@ highlighting.</p>
 <dd><p>An inline response box.</p>
 <p>Can contain the following node types:</p>
 <ul class="simple">
-<li><p>Text</p></li>
-<li><p>InlineMath</p></li>
-<li><p>InlineCode</p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineMath" title="panprob.ast.InlineMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineMath</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code></a></p></li>
 </ul>
 </dd></dl>
 
@@ -520,127 +600,36 @@ highlighting.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">Solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.Solution" title="Link to this definition"></a></dt>
 <dd><p>A solution to a problem.</p>
 <p>Can contain all of the same types as a <a class="reference internal" href="#panprob.ast.Solution" title="panprob.ast.Solution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Solution</span></code></a> node.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.Code" title="panprob.ast.Code"><code class="xref py py-class docutils literal notranslate"><span class="pre">Code</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.CodeFile" title="panprob.ast.CodeFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodeFile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.DisplayMath" title="panprob.ast.DisplayMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">DisplayMath</span></code></a></p></li>
+<li><p><a class="reference internal" href="#panprob.ast.ImageFile" title="panprob.ast.ImageFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageFile</span></code></a></p></li>
+</ul>
 </dd></dl>
 
 </section>
 </section>
 <section id="example">
 <h3>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h3>
-<p>The below shows an example of creating an AST by hand. This is not the
-recommended way to create an AST, but it is useful for understanding how the
-AST works.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">prob</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>
-
-<span class="c1"># create children and add them one-by-one</span>
-<span class="n">para</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Paragraph</span><span class="p">()</span>
-<span class="n">para</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Is &quot;hello world&quot; a common test phrase?&#39;</span><span class="p">))</span>
-
-<span class="n">prob</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">para</span><span class="p">)</span>
-<span class="n">prob</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">TrueFalse</span><span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">))</span>
-
-<span class="c1"># create children and add them all at once</span>
-<span class="n">prob</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Solution</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
-    <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Yes, it is. In fact, it is &quot;</span><span class="p">),</span>
-    <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;very&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot; common.&quot;</span><span class="p">),</span>
-<span class="p">]))</span>
+<p>The below shows an example of creating an AST by hand:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ast</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">Paragraph</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Is &#39;hello world&#39; a common test phrase?&quot;</span><span class="p">),</span>
+    <span class="p">]),</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">TrueFalse</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">Solution</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">Paragraph</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;Yes, it is. In fact, it is &quot;</span><span class="p">),</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;very&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot; common.&quot;</span><span class="p">),</span>
+        <span class="p">]),</span>
+    <span class="p">]),</span>
+<span class="p">])</span>
 </pre></div>
 </div>
-</section>
-<section id="postprocessors">
-<h3>Postprocessors<a class="headerlink" href="#postprocessors" title="Link to this heading"></a></h3>
-<p>These “postprocessors” take an AST as input and (typically) modify it in some
-way.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="panprob.ast.postprocessors.paragraphize">
-<span class="sig-prename descclassname"><span class="pre">panprob.ast.postprocessors.</span></span><span class="sig-name descname"><span class="pre">paragraphize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#panprob.ast.InternalNode" title="panprob.ast._types.InternalNode"><span class="pre">InternalNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#panprob.ast.InternalNode" title="panprob.ast._types.InternalNode"><span class="pre">InternalNode</span></a></span></span><a class="headerlink" href="#panprob.ast.postprocessors.paragraphize" title="Link to this definition"></a></dt>
-<dd><p>Creates a new AST with <code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code> nodes inserted where appropriate.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="#panprob.ast.InternalNode" title="panprob.ast.InternalNode"><em>InternalNode</em></a>) – The root node of the AST.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A new AST with Paragraph nodes inserted.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#panprob.ast.InternalNode" title="panprob.ast.InternalNode">InternalNode</a></p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>In some input formats, like LaTeX, paragraphs are not explicitly marked.
-This makes it difficult for parsers to know where paragraphs begin and end,
-and thus where to insert Paragraph nodes into the AST. This postprocessor
-attempts to do that post hoc.</p>
-<p>For example, a Problem node could have the children:</p>
-<ul class="simple">
-<li><p><cite>Text(“This is the first “)</cite></p></li>
-<li><p><cite>Text(“problem”, bold=True)</cite></p></li>
-<li><p><cite>Text(” in the assignment.\n\n”)</cite></p></li>
-<li><p><cite>Text(“It is worth 10 points.”)</cite></p></li>
-<li><p><cite>Solution(…)</cite></p></li>
-</ul>
-<p>We want to merge the first three nodes into a single paragraph node. The last
-Text node is in a separate paragraph (due to the “\n\n”), so we’ll create
-a second paragraph node for that. So the result will be</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- Paragraph(
-        children=[
-            Text(&quot;This is the first &quot;),
-            Text(&quot;problem&quot;, bold=True),
-            Text(&quot; in the assignment.&quot;),
-            ]
-        )
-- Paragraph(
-        children=[
-            Text(&quot;It is worth 10 points.&quot;),
-            ]
-        )
-- Solution(...)
-</pre></div>
-</div>
-<p>This function performs the fix recursively on the tree, producing a new
-tree with the same general structure but with paragraph nodes added.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="panprob.ast.postprocessors.copy_images">
-<span class="sig-prename descclassname"><span class="pre">panprob.ast.postprocessors.</span></span><span class="sig-name descname"><span class="pre">copy_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#panprob.ast.postprocessors.copy_images" title="Link to this definition"></a></dt>
-<dd><p>Copy the images referenced by ImageFile nodes to the destination directory.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="#panprob.ast.Node" title="panprob.ast.Node"><em>Node</em></a>) – The root node of the AST.</p></li>
-<li><p><strong>src</strong> (<em>pathlib.Path</em>) – The directory containing the images to be copied. All relative paths in
-the AST are relative to this.</p></li>
-<li><p><strong>dest</strong> (<em>pathlib.Path</em>) – The path to the directory where the files should be copied to. All
-necessary directories will be created.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="panprob.ast.postprocessors.subsume_code">
-<span class="sig-prename descclassname"><span class="pre">panprob.ast.postprocessors.</span></span><span class="sig-name descname"><span class="pre">subsume_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></span><a class="headerlink" href="#panprob.ast.postprocessors.subsume_code" title="Link to this definition"></a></dt>
-<dd><p>Replaces all <code class="xref py py-class docutils literal notranslate"><span class="pre">CodeFile</span></code> nodes in the AST with <code class="xref py py-class docutils literal notranslate"><span class="pre">Code</span></code> nodes
-by reading the code from disk.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> (<a class="reference internal" href="#panprob.ast.Node" title="panprob.ast.Node"><em>Node</em></a>) – The node to transform.</p></li>
-<li><p><strong>root</strong> (<em>pathlib.Path</em>) – The path to the root directory. All relative paths in the AST are
-assumed to be relative to this path.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The transformed node with the code subsumed. Does not modify the
-original node.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#panprob.ast.Node" title="panprob.ast.Node">Node</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 </section>
 <section id="writing-a-new-parser-or-renderer">
@@ -666,7 +655,7 @@ source of the existing renderers on <a class="reference external" href="https://
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="renderers.html" class="btn btn-neutral float-left" title="Renderers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="exceptions.html" class="btn btn-neutral float-left" title="Exceptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

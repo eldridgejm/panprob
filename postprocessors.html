@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Postprocessors &mdash; panprob 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Exceptions" href="exceptions.html" />
+    <link rel="prev" title="Renderers" href="renderers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            panprob
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderers.html">Renderers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Postprocessors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subsume-code">Subsume Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#panprob.postprocessors.subsume_code"><code class="docutils literal notranslate"><span class="pre">subsume_code()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#copy-images">Copy Images</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#panprob.postprocessors.copy_images"><code class="docutils literal notranslate"><span class="pre">copy_images()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#paragraphize">Paragraphize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#panprob.postprocessors.paragraphize"><code class="docutils literal notranslate"><span class="pre">paragraphize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">panprob</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Postprocessors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/postprocessors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="postprocessors">
+<h1>Postprocessors<a class="headerlink" href="#postprocessors" title="Link to this heading"></a></h1>
+<p>These “postprocessors” take an AST as input and (typically) modify it in some
+way. They can be useful for making changes to the AST after parsing, or for
+writing parsers themselves.</p>
+<section id="subsume-code">
+<h2>Subsume Code<a class="headerlink" href="#subsume-code" title="Link to this heading"></a></h2>
+<p>Sometimes it is useful to replace all <a class="reference internal" href="ast.html#panprob.ast.CodeFile" title="panprob.ast.CodeFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.CodeFile</span></code></a> nodes
+(which are simply references to a code file) with the contents of the code
+file. This can be done with the following function:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="panprob.postprocessors.subsume_code">
+<span class="sig-prename descclassname"><span class="pre">panprob.postprocessors.</span></span><span class="sig-name descname"><span class="pre">subsume_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></span><a class="headerlink" href="#panprob.postprocessors.subsume_code" title="Link to this definition"></a></dt>
+<dd><p>Replaces all <code class="xref py py-class docutils literal notranslate"><span class="pre">CodeFile</span></code> nodes in the AST with <code class="xref py py-class docutils literal notranslate"><span class="pre">Code</span></code> nodes
+by reading the code from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node</strong> (<a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast.Node"><em>Node</em></a>) – The node to transform.</p></li>
+<li><p><strong>root</strong> (<em>pathlib.Path</em>) – The path to the root directory. All relative paths in the AST are
+assumed to be relative to this path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed node with the code subsumed. Does not modify the
+original node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast.Node">Node</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="copy-images">
+<h2>Copy Images<a class="headerlink" href="#copy-images" title="Link to this heading"></a></h2>
+<p>A common use case for <cite>panprob</cite> is to convert all of the problems in one
+directory, placing the output in another directory. If the problems contain
+images, then the images will need to be copied to the output directory as well.
+This can be done with the following function (which doesn’t actually modify the
+AST):</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="panprob.postprocessors.copy_images">
+<span class="sig-prename descclassname"><span class="pre">panprob.postprocessors.</span></span><span class="sig-name descname"><span class="pre">copy_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#panprob.postprocessors.copy_images" title="Link to this definition"></a></dt>
+<dd><p>Copy the images referenced by ImageFile nodes to the destination directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node</strong> (<a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast.Node"><em>Node</em></a>) – The root node of the AST.</p></li>
+<li><p><strong>src</strong> (<em>pathlib.Path</em>) – The directory containing the images to be copied. All relative paths in
+the AST are relative to this.</p></li>
+<li><p><strong>dest</strong> (<em>pathlib.Path</em>) – The path to the directory where the files should be copied to. All
+necessary directories will be created.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="paragraphize">
+<h2>Paragraphize<a class="headerlink" href="#paragraphize" title="Link to this heading"></a></h2>
+<p>A postprocessor that is most useful for writing simpler parsers.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code> and inline content, such as <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineMath</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code>, and <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResponseBox</span></code>, cannot appear directly
+under, e.g., a <code class="xref py py-class docutils literal notranslate"><span class="pre">Problem</span></code> in an AST; they must instead be contained
+within a <code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code>. However, it can be difficult for the parser to
+know where a paragraph should be created during parse time. Rather, it is
+often easier to infer this <em>post hoc</em>, after the full AST has been built.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> special node type exists to enable such a <em>post hoc</em>
+approach to creating paragraphs. Instead of placing text directly into a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code> during parsing, the parser puts one or more pieces of
+text into a <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code>. Then, after the AST has been created, a
+post-processing step is run that converts all <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> nodes into
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code> nodes by merging or splitting them as necessary. This
+post-processing step is implemented in the
+<a class="reference internal" href="#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a> function:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="panprob.postprocessors.paragraphize">
+<span class="sig-prename descclassname"><span class="pre">panprob.postprocessors.</span></span><span class="sig-name descname"><span class="pre">paragraphize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.InternalNode" title="panprob.ast._types.InternalNode"><span class="pre">InternalNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ast.html#panprob.ast.InternalNode" title="panprob.ast._types.InternalNode"><span class="pre">InternalNode</span></a></span></span><a class="headerlink" href="#panprob.postprocessors.paragraphize" title="Link to this definition"></a></dt>
+<dd><p>Recursively creates <code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code> nodes from <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> nodes.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> nodes may contain <code class="xref py py-class docutils literal notranslate"><span class="pre">ParBreak</span></code> nodes, representing
+forced paragraph breaks.</p>
+<p>As a side effect, this removes leading and trailing spaces from the paragraph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="ast.html#panprob.ast.InternalNode" title="panprob.ast.InternalNode"><em>panprob.ast.InternalNode</em></a>) – The node to paragraphize.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The paragraphized node. The original node is not modified.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="ast.html#panprob.ast.InternalNode" title="panprob.ast.InternalNode">panprob.ast.InternalNode</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Suppose we have the following tree:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Problem</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Blob</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;This is a paragraph.&quot;</span><span class="p">),</span>
+        <span class="n">ParBreak</span><span class="p">(),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;This is another paragraph with &quot;</span><span class="p">)</span>
+    <span class="p">]),</span>
+    <span class="n">Blob</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">]),</span>
+    <span class="n">Blob</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot; sentences.&quot;</span><span class="p">),</span>
+    <span class="p">])</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+<p>Though this tree has three <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> nodes, it represents two paragraphs.</p>
+<p>When we run <a class="reference internal" href="#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">paragraphize()</span></code></a> on this tree, we get the result below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Problem</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Paragraph</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;This is a paragraph.&quot;</span><span class="p">),</span>
+    <span class="p">]),</span>
+    <span class="n">Paragraph</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;This is another paragraph with &quot;</span><span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">&quot; sentences.&quot;</span><span class="p">),</span>
+    <span class="p">])</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="renderers.html" class="btn btn-neutral float-left" title="Renderers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="exceptions.html" class="btn btn-neutral float-right" title="Exceptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Justin Eldridge.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

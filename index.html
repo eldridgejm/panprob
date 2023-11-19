@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to panprob’s documentation! &mdash; panprob 0.0.0 documentation</title>
+  <title>panprob &mdash; panprob 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=7026087e"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -45,6 +45,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="renderers.html">Renderers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessors.html">Postprocessors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
 </ul>
 
@@ -62,7 +64,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to panprob’s documentation!</li>
+      <li class="breadcrumb-item active">panprob</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -72,10 +74,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-panprob-s-documentation">
-<h1>Welcome to panprob’s documentation!<a class="headerlink" href="#welcome-to-panprob-s-documentation" title="Link to this heading"></a></h1>
+  <section id="panprob">
+<h1>panprob<a class="headerlink" href="#panprob" title="Link to this heading"></a></h1>
 <p><cite>panprob</cite> is a Python package for converting between different problem formats.
-See the source code on <a class="reference external" href="https://github.com/eldridgejm/panprob">GitHub</a>.</p>
+Currently, <cite>panprob</cite> can read problems written in <a class="reference external" href="https://help.gradescope.com/article/gm5cmcz19k-instructor-assignment-online">Gradescope-flavored markdown</a>
+and <a class="reference external" href="https://eldridgejm.github.io/dsctex">DSCTeX LaTeX</a>, and can render problems in
+Gradescope-flavored markdown, DSCTeX, and HTML.</p>
+<p>See the source code on <a class="reference external" href="https://github.com/eldridgejm/panprob">GitHub</a>.</p>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
 <section id="from-python">
@@ -95,12 +100,10 @@ function:</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>str</em> – The converted string.</p></li>
-<li><p><em>For more control over the parsers and renderers, see the corresponding</em></p></li>
-<li><p><em>parts of the documentation.</em></p></li>
-</ul>
-</p>
+<dd class="field-even"><p>The converted string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -160,6 +163,19 @@ and pass them along with the problem source to <cite>panprob.convert</cite>:</p>
 <li class="toctree-l2"><a class="reference internal" href="renderers.html#module-panprob.renderers.html">HTML</a></li>
 <li class="toctree-l2"><a class="reference internal" href="renderers.html#module-panprob.renderers.dsctex">DSCTeX</a></li>
 <li class="toctree-l2"><a class="reference internal" href="renderers.html#module-panprob.renderers.gsmd">Gradescope Markdown</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="postprocessors.html#subsume-code">Subsume Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessors.html#copy-images">Copy Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessors.html#paragraphize">Paragraphize</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#panprob.exceptions.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#panprob.exceptions.ParseError"><code class="docutils literal notranslate"><span class="pre">ParseError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#panprob.exceptions.RenderError"><code class="docutils literal notranslate"><span class="pre">RenderError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#panprob.exceptions.IllegalChild"><code class="docutils literal notranslate"><span class="pre">IllegalChild</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a><ul>

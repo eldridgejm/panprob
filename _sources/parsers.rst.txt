@@ -2,12 +2,14 @@ Parsers
 =======
 
 `panprob` converts problems by first *parsing* them into an intermediate format (an
-abstract syntax tree, or AST) and then *rendering* that tree into the desired output
+abstract syntax tree, or AST, of nodes from :mod:`panprob.ast`) and then *rendering* that tree into the desired output
 format. The parsers provided by `panprob` are documented below.
 
-Note that most use cases do not require instantiating a parsers directly. Instead,
-you should use the :func:`panprob.convert` function, which does parsing and rendering
-in one step.
+.. note::
+
+    Most use cases do not require instantiating a parsers directly. Instead,
+    you should use the :func:`panprob.convert` function, which does parsing and
+    rendering in one step.
 
 DSCTeX
 ------
@@ -39,9 +41,6 @@ The commands understood by the parser are:
 - :code:`\\mintinline` for inline code.
 - :code:`\\Tf` for true/false questions (whose answer is True).
 - :code:`\\tF` for true/false questions (whose answer is False).
-
-The default command and environment converters are defined in the
-:mod:`panprob.parsers.dsctex.converters` module.
 
 
 Custom Commands and Environments
@@ -75,20 +74,27 @@ Example - :code:`\\python` command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Suppose your LaTeX source uses a custom command called :code:`\\python` to
-represent inline Python code. This is not one of the default converters, but
-you can define a converter function to convert this command to a
-:class:`panprob.ast.InlineCode` node and pass it to :func:`parse`:
+represent inline Python code. This is not one of the commands understood by
+this parser by default, but you can define a converter function to convert this
+command to a :class:`panprob.ast.InlineCode` node and pass it to :func:`parse`:
 
 .. code-block:: python
 
-    from panprob.ast import InlineCode
+    from panprob.ast import InlineCode, Blob
 
     def convert_python(node, children):
-        return ast.InlineCode("python", "this")
+        return ast.Blob(children=[ast.InlineCode("python", "this")])
 
     latex = r"\python{x = 3 + 4}"
 
     tree = parse(latex, command_converters={"python": convert_python})
+
+Note that we've placed the :class:`InlineCode` node inside a
+:class:`panprob.ast.Blob`; this is done because detecting paragraphs at parse
+time is difficult, so the parser instead uses
+:func:`panprob.postprocessors.paragraphize` to detect paragraphs from blobs
+after parsing. In general, all text that can be contained in a paragraph should
+be placed into a :class:`Blob` by your converter function.
 
 Gradescope Markdown
 -------------------

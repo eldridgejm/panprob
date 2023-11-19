@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Parsers &mdash; panprob 0.0.0 documentation</title>
+  <title>Parsers &mdash; panprob 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,14 +13,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=7026087e"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Renderers" href="renderers.html" />
-    <link rel="prev" title="Welcome to panprob’s documentation!" href="index.html" /> 
+    <link rel="prev" title="panprob" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -62,6 +62,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="renderers.html">Renderers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessors.html">Postprocessors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
 </ul>
 
@@ -92,17 +94,20 @@
   <section id="parsers">
 <h1>Parsers<a class="headerlink" href="#parsers" title="Link to this heading"></a></h1>
 <p><cite>panprob</cite> converts problems by first <em>parsing</em> them into an intermediate format (an
-abstract syntax tree, or AST) and then <em>rendering</em> that tree into the desired output
+abstract syntax tree, or AST, of nodes from <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>) and then <em>rendering</em> that tree into the desired output
 format. The parsers provided by <cite>panprob</cite> are documented below.</p>
-<p>Note that most use cases do not require instantiating a parsers directly. Instead,
-you should use the <a class="reference internal" href="index.html#panprob.convert" title="panprob.convert"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.convert()</span></code></a> function, which does parsing and rendering
-in one step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Most use cases do not require instantiating a parsers directly. Instead,
+you should use the <a class="reference internal" href="index.html#panprob.convert" title="panprob.convert"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.convert()</span></code></a> function, which does parsing and
+rendering in one step.</p>
+</div>
 <section id="module-panprob.parsers.dsctex">
 <span id="dsctex"></span><h2>DSCTeX<a class="headerlink" href="#module-panprob.parsers.dsctex" title="Link to this heading"></a></h2>
 <p>Parser for problems written in LaTeX with the <cite>DSCTeX</cite> package.</p>
 <p>A problem written with DSCTeX looks like the below:</p>
 <div class="highlight-latex notranslate"><div class="highlight"><pre><span></span><span class="k">\begin</span><span class="nb">{</span>problem<span class="nb">}</span>
-    What is the largest building at UCSD?
+    What is the most famous building at UCSD?
 
     <span class="k">\begin</span><span class="nb">{</span>solution<span class="nb">}</span>
         Geisel Library, probably.
@@ -135,7 +140,7 @@ into panprob AST nodes. See below for the expected signature of these</p></li>
 <dd class="field-odd"><p><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem">panprob.ast.Problem</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>panprob.exceptions.Error</strong> – If the source cannot be parsed for some reason. For example, if it
+<dd class="field-even"><p><strong>panprob.ParseError</strong> – If the source cannot be parsed for some reason. For example, if it
     contains an unrecognized command or environment.</p>
 </dd>
 </dl>
@@ -147,11 +152,8 @@ converters.</p>
 <p>Converter functions should accept two arguments: 1) the LaTeX
 <a class="reference internal" href="#panprob.parsers.dsctex.Environment" title="panprob.parsers.dsctex.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> or <a class="reference internal" href="#panprob.parsers.dsctex.Command" title="panprob.parsers.dsctex.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> node to convert, and 2) a function
 that can be used as a callback to recursively convert the children of the
-node, if necessary. The converter function should return a panprob AST
-node. See the documentation for examples.</p>
-<p>The parser is not capable of accurately detecting the paragraph structure
-in the source. To add paragraph breaks to the parsed problem post hoc, use
-<a class="reference internal" href="ast.html#panprob.ast.postprocessors.paragraphize" title="panprob.ast.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.ast.postprocessors.paragraphize()</span></code></a>.</p>
+node, if necessary. The converter function should return a <cite>panprob</cite> AST
+node. See the documentation on extending <cite>panprob</cite> for examples.</p>
 </dd></dl>
 
 <p>The environments understood by the parser are:</p>
@@ -174,8 +176,6 @@ in the source. To add paragraph breaks to the parsed problem post hoc, use
 <li><p><code class="code docutils literal notranslate"><span class="pre">\Tf</span></code> for true/false questions (whose answer is True).</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">\tF</span></code> for true/false questions (whose answer is False).</p></li>
 </ul>
-<p>The default command and environment converters are defined in the
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.parsers.dsctex.converters</span></code> module.</p>
 <section id="custom-commands-and-environments">
 <h3>Custom Commands and Environments<a class="headerlink" href="#custom-commands-and-environments" title="Link to this heading"></a></h3>
 <p>Because it is common when writing LaTeX to define custom commands and
@@ -288,7 +288,7 @@ was a required argument or an optional argument, respectively.</p>
 
 <p>Once this tree representing the LaTeX document has been constructed, the parser
 then walks through it, looking for commands and environments that it knows how
-to “convert” to <code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code> nodes. This module defines numerous
+to “convert” to <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code></a> nodes. This module defines numerous
 “converter” functions for this purpose, but you can define your own, overriding
 or extending the defaults.</p>
 <p>In short, a “converter” is a function that takes two arguments:</p>
@@ -296,23 +296,29 @@ or extending the defaults.</p>
 <li><p>a <a class="reference internal" href="#panprob.parsers.dsctex.Command" title="panprob.parsers.dsctex.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a> or <a class="reference internal" href="#panprob.parsers.dsctex.Environment" title="panprob.parsers.dsctex.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> object.</p></li>
 <li><p>a callback function that can be used to convert the children of the node</p></li>
 </ol>
-<p>It should return a node type from <code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
+<p>It should return a node type from <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>.</p>
 <section id="example-python-command">
 <h4>Example - <code class="code docutils literal notranslate"><span class="pre">\python</span></code> command<a class="headerlink" href="#example-python-command" title="Link to this heading"></a></h4>
 <p>Suppose your LaTeX source uses a custom command called <code class="code docutils literal notranslate"><span class="pre">\python</span></code> to
-represent inline Python code. This is not one of the default converters, but
-you can define a converter function to convert this command to a
-<a class="reference internal" href="ast.html#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineCode</span></code></a> node and pass it to <a class="reference internal" href="#panprob.parsers.dsctex.parse" title="panprob.parsers.dsctex.parse"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse()</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">panprob.ast</span> <span class="kn">import</span> <span class="n">InlineCode</span>
+represent inline Python code. This is not one of the commands understood by
+this parser by default, but you can define a converter function to convert this
+command to a <a class="reference internal" href="ast.html#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineCode</span></code></a> node and pass it to <a class="reference internal" href="#panprob.parsers.dsctex.parse" title="panprob.parsers.dsctex.parse"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse()</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">panprob.ast</span> <span class="kn">import</span> <span class="n">InlineCode</span><span class="p">,</span> <span class="n">Blob</span>
 
 <span class="k">def</span> <span class="nf">convert_python</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">InlineCode</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="s2">&quot;this&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">Blob</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">InlineCode</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="s2">&quot;this&quot;</span><span class="p">)])</span>
 
 <span class="n">latex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\python{x = 3 + 4}&quot;</span>
 
 <span class="n">tree</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">latex</span><span class="p">,</span> <span class="n">command_converters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">convert_python</span><span class="p">})</span>
 </pre></div>
 </div>
+<p>Note that we’ve placed the <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code> node inside a
+<a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a>; this is done because detecting paragraphs at parse
+time is difficult, so the parser instead uses
+<a class="reference internal" href="postprocessors.html#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a> to detect paragraphs from blobs
+after parsing. In general, all text that can be contained in a paragraph should
+be placed into a <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> by your converter function.</p>
 </section>
 </section>
 </section>
@@ -340,9 +346,16 @@ short answer boxes.</p>
 <dd class="field-odd"><p><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem">ast.Problem</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>panprob.exceptions.Error</strong> – If the source cannot be parsed for some known reason.</p>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#panprob.exceptions.ParseError" title="panprob.exceptions.ParseError"><strong>panprob.exceptions.ParseError</strong></a> – If the source cannot be parsed for some known reason.</p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>This parser does not support inline images, such as:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>This is an image: ![<span class="nt">alt text</span>](<span class="na">path/to/image.png</span>)
+</pre></div>
+</div>
+<p>Images should instead be placed on their own line. If an inline image is
+encountered, a <a class="reference internal" href="exceptions.html#panprob.exceptions.ParseError" title="panprob.exceptions.ParseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.exceptions.ParseError</span></code></a> will be raised.</p>
 </dd></dl>
 
 </section>
@@ -352,7 +365,7 @@ short answer boxes.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to panprob’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="panprob" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="renderers.html" class="btn btn-neutral float-right" title="Renderers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

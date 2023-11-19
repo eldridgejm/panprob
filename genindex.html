@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; panprob 0.0.0 documentation</title>
+  <title>Index &mdash; panprob 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,7 +12,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=7026087e"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -43,6 +43,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="renderers.html">Renderers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessors.html">Postprocessors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
 </ul>
 
@@ -104,8 +106,6 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ast.html#panprob.ast.InternalNode.add_child">add_child() (panprob.ast.InternalNode method)</a>
-</li>
       <li><a href="ast.html#panprob.ast.InternalNode.allowed_child_types">allowed_child_types (panprob.ast.InternalNode attribute)</a>
 </li>
   </ul></td>
@@ -122,6 +122,10 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ast.html#panprob.ast.Blob">Blob (class in panprob.ast)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ast.html#panprob.ast.Text.bold">bold (panprob.ast.Text attribute)</a>
 </li>
   </ul></td>
@@ -130,7 +134,7 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ast.html#panprob.ast.InternalNode.children">children (panprob.ast.InternalNode attribute)</a>
+      <li><a href="ast.html#panprob.ast.InternalNode.children">children (panprob.ast.InternalNode property)</a>
 </li>
       <li><a href="ast.html#panprob.ast.Choice">Choice (class in panprob.ast)</a>
 </li>
@@ -152,7 +156,7 @@
 </li>
       <li><a href="index.html#panprob.convert">convert() (in module panprob)</a>
 </li>
-      <li><a href="ast.html#panprob.ast.postprocessors.copy_images">copy_images() (in module panprob.ast.postprocessors)</a>
+      <li><a href="postprocessors.html#panprob.postprocessors.copy_images">copy_images() (in module panprob.postprocessors)</a>
 </li>
       <li><a href="ast.html#panprob.ast.Choice.correct">correct (panprob.ast.Choice attribute)</a>
 </li>
@@ -173,19 +177,25 @@
       <li><a href="parsers.html#panprob.parsers.dsctex.Environment">Environment (class in panprob.parsers.dsctex)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="exceptions.html#panprob.exceptions.Error">Error (class in panprob.exceptions)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="exceptions.html#panprob.exceptions.IllegalChild">IllegalChild (class in panprob.exceptions)</a>
+</li>
       <li><a href="ast.html#panprob.ast.ImageFile">ImageFile (class in panprob.ast)</a>
 </li>
       <li><a href="ast.html#panprob.ast.InlineCode">InlineCode (class in panprob.ast)</a>
 </li>
-      <li><a href="ast.html#panprob.ast.InlineMath">InlineMath (class in panprob.ast)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ast.html#panprob.ast.InlineMath">InlineMath (class in panprob.ast)</a>
+</li>
       <li><a href="ast.html#panprob.ast.InlineResponseBox">InlineResponseBox (class in panprob.ast)</a>
 </li>
       <li><a href="ast.html#panprob.ast.InternalNode">InternalNode (class in panprob.ast)</a>
@@ -226,6 +236,8 @@
     module
 
       <ul>
+        <li><a href="ast.html#module-panprob.ast">panprob.ast</a>
+</li>
         <li><a href="parsers.html#module-panprob.parsers.dsctex">panprob.parsers.dsctex</a>
 </li>
         <li><a href="parsers.html#module-panprob.parsers.gsmd">panprob.parsers.gsmd</a>
@@ -266,6 +278,13 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
+    panprob.ast
+
+      <ul>
+        <li><a href="ast.html#module-panprob.ast">module</a>
+</li>
+      </ul></li>
+      <li>
     panprob.parsers.dsctex
 
       <ul>
@@ -293,8 +312,6 @@
         <li><a href="renderers.html#module-panprob.renderers.gsmd">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     panprob.renderers.html
 
@@ -302,14 +319,28 @@
         <li><a href="renderers.html#module-panprob.renderers.html">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ast.html#panprob.ast.Paragraph">Paragraph (class in panprob.ast)</a>
 </li>
-      <li><a href="ast.html#panprob.ast.postprocessors.paragraphize">paragraphize() (in module panprob.ast.postprocessors)</a>
+      <li><a href="postprocessors.html#panprob.postprocessors.paragraphize">paragraphize() (in module panprob.postprocessors)</a>
+</li>
+      <li><a href="ast.html#panprob.ast.ParBreak">ParBreak (class in panprob.ast)</a>
 </li>
       <li><a href="parsers.html#panprob.parsers.dsctex.parse">parse() (in module panprob.parsers.dsctex)</a>
 
       <ul>
         <li><a href="parsers.html#panprob.parsers.gsmd.parse">(in module panprob.parsers.gsmd)</a>
+</li>
+      </ul></li>
+      <li><a href="exceptions.html#panprob.exceptions.ParseError">ParseError (class in panprob.exceptions)</a>
+</li>
+      <li><a href="ast.html#panprob.ast.InternalNode.prettify">prettify() (panprob.ast.InternalNode method)</a>
+
+      <ul>
+        <li><a href="ast.html#panprob.ast.LeafNode.prettify">(panprob.ast.LeafNode method)</a>
+</li>
+        <li><a href="ast.html#panprob.ast.Node.prettify">(panprob.ast.Node method)</a>
 </li>
       </ul></li>
       <li><a href="ast.html#panprob.ast.Problem">Problem (class in panprob.ast)</a>
@@ -338,6 +369,8 @@
         <li><a href="renderers.html#panprob.renderers.html.render">(in module panprob.renderers.html)</a>
 </li>
       </ul></li>
+      <li><a href="exceptions.html#panprob.exceptions.RenderError">RenderError (class in panprob.exceptions)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -350,7 +383,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ast.html#panprob.ast.Subproblem">Subproblem (class in panprob.ast)</a>
 </li>
-      <li><a href="ast.html#panprob.ast.postprocessors.subsume_code">subsume_code() (in module panprob.ast.postprocessors)</a>
+      <li><a href="postprocessors.html#panprob.postprocessors.subsume_code">subsume_code() (in module panprob.postprocessors)</a>
 </li>
   </ul></td>
 </tr></table>

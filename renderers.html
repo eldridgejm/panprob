@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Renderers &mdash; panprob 0.0.0 documentation</title>
+  <title>Renderers &mdash; panprob 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,13 +13,13 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=7026087e"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Extending panprob" href="ast.html" />
+    <link rel="next" title="Postprocessors" href="postprocessors.html" />
     <link rel="prev" title="Parsers" href="parsers.html" /> 
 </head>
 
@@ -60,6 +60,8 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessors.html">Postprocessors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ast.html">Extending <cite>panprob</cite></a></li>
 </ul>
 
@@ -89,10 +91,10 @@
              
   <section id="renderers">
 <h1>Renderers<a class="headerlink" href="#renderers" title="Link to this heading"></a></h1>
-<p>As described in the previous section, <cite>panprob</cite> converts problems by first
-<em>parsing</em> them into an intermediate format (an abstract syntax tree, or AST)
-and then <em>rendering</em> that tree into the desired output format. The renderers
-provided by <cite>panprob</cite> are described below.</p>
+<p><cite>panprob</cite> converts problems by first <em>parsing</em> them into an intermediate format
+(an abstract syntax tree, or AST, of nodes from <a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>) and then
+<em>rendering</em> that tree into the desired output format. The renderers provided by
+<cite>panprob</cite> are described below.</p>
 <section id="module-panprob.renderers.html">
 <span id="html"></span><h2>HTML<a class="headerlink" href="#module-panprob.renderers.html" title="Link to this heading"></a></h2>
 <p>Renders a problem to HTML.</p>
@@ -100,7 +102,9 @@ provided by <cite>panprob</cite> are described below.</p>
 <dt class="sig sig-object py" id="panprob.renderers.html.render">
 <span class="sig-prename descclassname"><span class="pre">panprob.renderers.html.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast._types.Problem"><span class="pre">Problem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overrides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.renderers.html.render" title="Link to this definition"></a></dt>
 <dd><p>Render a problem to HTML.</p>
-<p>This render is capable of rendering all node types from <code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
+<p>This renderer is capable of rendering all node types from
+<a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>, except for the special nodes <a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a>
+and <a class="reference internal" href="ast.html#panprob.ast.ParBreak" title="panprob.ast.ParBreak"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.ParBreak</span></code></a>, which should not appear in the AST.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -115,6 +119,10 @@ expected signature of these functions.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#panprob.exceptions.RenderError" title="panprob.exceptions.RenderError"><strong>RenderError</strong></a> – If there is an issue rendering this tree, such as when an unkown AST
+    node type is encountered.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -137,7 +145,9 @@ node renderer for each child node.</p></li>
 <dt class="sig sig-object py" id="panprob.renderers.dsctex.render">
 <span class="sig-prename descclassname"><span class="pre">panprob.renderers.dsctex.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast._types.Problem"><span class="pre">Problem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overrides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.renderers.dsctex.render" title="Link to this definition"></a></dt>
 <dd><p>Render a problem to a DSCTeX problem in LaTeX.</p>
-<p>This render is capable of rendering all node types from <code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
+<p>This renderer is capable of rendering all node types from
+<a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code></a>, except for the special nodes <a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a>
+and <a class="reference internal" href="ast.html#panprob.ast.ParBreak" title="panprob.ast.ParBreak"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.ParBreak</span></code></a>, which should not appear in the AST.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -152,6 +162,10 @@ expected signature of these functions.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#panprob.exceptions.RenderError" title="panprob.exceptions.RenderError"><strong>RenderError</strong></a> – If there is an issue rendering this tree, such as when an unkown AST
+    node type is encountered.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -174,7 +188,14 @@ node renderer for each child node.</p></li>
 <dt class="sig sig-object py" id="panprob.renderers.gsmd.render">
 <span class="sig-prename descclassname"><span class="pre">panprob.renderers.gsmd.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast._types.Problem"><span class="pre">Problem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">overrides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#panprob.renderers.gsmd.render" title="Link to this definition"></a></dt>
 <dd><p>Render a problem in Gradescope markdown.</p>
-<p>This render is capable of rendering all node types from <code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code>.</p>
+<p>This renderer is capable of rendering all node types from
+<a class="reference internal" href="ast.html#module-panprob.ast" title="panprob.ast"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panprob.ast</span></code></a> except for <a class="reference internal" href="ast.html#panprob.ast.CodeFile" title="panprob.ast.CodeFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.CodeFile</span></code></a> and special
+nodes, like <a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a> and <a class="reference internal" href="ast.html#panprob.ast.ParBreak" title="panprob.ast.ParBreak"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.ParBreak</span></code></a>.</p>
+<p><a class="reference internal" href="ast.html#panprob.ast.CodeFile" title="panprob.ast.CodeFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.CodeFile</span></code></a> is not supported because Gradescope markdown
+does not support code files. Gradescope markdown also does not support
+complex multiple choice options with multiple lines of text, so
+<a class="reference internal" href="ast.html#panprob.ast.Choice" title="panprob.ast.Choice"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Choice</span></code></a> nodes with multiple lines of text will raise
+<a class="reference internal" href="exceptions.html#panprob.exceptions.RenderError" title="panprob.exceptions.RenderError"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.exceptions.RenderError</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -189,6 +210,10 @@ expected signature of these functions.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#panprob.exceptions.RenderError" title="panprob.exceptions.RenderError"><strong>RenderError</strong></a> – If there is an issue rendering this tree, such as when an unkown AST
+    node type is encountered.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -211,7 +236,7 @@ node renderer for each child node.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="parsers.html" class="btn btn-neutral float-left" title="Parsers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ast.html" class="btn btn-neutral float-right" title="Extending panprob" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="postprocessors.html" class="btn btn-neutral float-right" title="Postprocessors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -9,6 +9,8 @@ into an AST, and your renderer should take an AST and convert it to text.
 
 .. currentmodule:: panprob.ast
 
+.. module:: panprob.ast
+
 Abstract Syntax Trees
 ---------------------
 
@@ -16,15 +18,13 @@ Abstractly, a problem is made up of "components" such as images, paragraphs of
 text, response areas, and so forth. Representing a problem as an AST of Python
 objects does three things:
 
-    1) It defines a canonical problem format, and consequently determines the
-    common set of components that any problem format should support.
-
-    2) It allows us to more easily manipulate problems programmatically.
-
-    3) It saves us work when converting between one problem format to another.
-    Instead of writing a separate "transformer" for every combination of source
-    format and output format, we only need to write a parser for each input
-    format and a renderer for each output format.
+    1. It defines a canonical problem format, and consequently determines the
+       common set of components that any problem format should support.
+    2. It allows us to more easily manipulate problems programmatically.
+    3. It saves us work when converting between one problem format to another.
+       Instead of writing a separate "transformer" for every combination of source
+       format and output format, we only need to write a parser for each input
+       format and a renderer for each output format.
 
 Each node in the AST represents a component of a problem, such as an image, a
 response area, a paragraph of text, and so forth. This module provides Python
@@ -45,8 +45,6 @@ internal node type has a list of the types of nodes that it can contain. When
 the AST is constructed, the parser checks to make sure that child nodes are
 valid for their parent nodes -- if not, an exception is raised.
 
-"""
-
 Abstract Base Classes
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -55,7 +53,7 @@ some simple functionality that all nodes have in common: checking for equality, 
 printing a human-readable representation.
 
 .. autoclass:: Node
-   :members: __eq__, __repr__
+   :members: __eq__, __repr__, prettify
 
 Internal nodes derive from :class:`InternalNode`:
 
@@ -67,8 +65,8 @@ Leaf nodes derive from :class:`LeafNode`:
 .. autoclass:: LeafNode
    :members:
 
-Concrete Nodes
-^^^^^^^^^^^^^^
+Concrete Node Types
+^^^^^^^^^^^^^^^^^^^
 
 These node types represent problem components, such as paragraphs, response
 areas, images, and so forth.
@@ -82,6 +80,8 @@ Text
 ~~~~
 .. autoclass:: Paragraph
 .. autoclass:: Text
+.. autoclass:: Blob
+.. autoclass:: ParBreak
 
 Math
 ~~~~
@@ -110,37 +110,23 @@ Response Areas
 Example
 ^^^^^^^
 
-The below shows an example of creating an AST by hand. This is not the
-recommended way to create an AST, but it is useful for understanding how the
-AST works.
+The below shows an example of creating an AST by hand:
 
 .. code:: python
 
-    prob = ast.Problem()
-
-    # create children and add them one-by-one
-    para = ast.Paragraph()
-    para.add_child(ast.Text('Is "hello world" a common test phrase?'))
-
-    prob.add_child(para)
-    prob.add_child(ast.TrueFalse("True"))
-
-    # create children and add them all at once
-    prob.add_child(ast.Solution(children=[
-        ast.Text("Yes, it is. In fact, it is "),
-        ast.Text("very", bold=True),
-        ast.Text(" common."),
-    ]))
-
-Postprocessors
-^^^^^^^^^^^^^^
-
-These "postprocessors" take an AST as input and (typically) modify it in some
-way.
-
-.. autofunction:: panprob.ast.postprocessors.paragraphize
-.. autofunction:: panprob.ast.postprocessors.copy_images
-.. autofunction:: panprob.ast.postprocessors.subsume_code
+    ast.Problem(children=[
+        ast.Paragraph(children=[
+            ast.Text("Is 'hello world' a common test phrase?"),
+        ]),
+        ast.TrueFalse(True),
+        ast.Solution(children=[
+            ast.Paragraph(children=[
+                ast.Text("Yes, it is. In fact, it is "),
+                ast.Text("very", bold=True),
+                ast.Text(" common."),
+            ]),
+        ]),
+    ])
 
 Writing a New Parser or Renderer
 --------------------------------
