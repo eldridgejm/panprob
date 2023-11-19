@@ -135,7 +135,7 @@ If you have a new problem format that you want to convert to HTML or one of the
 other formats that `panprob` supports, you can write a parser for it. A parser
 is simply a function that takes a string as input and returns a
 :class:`Problem` object as output. You can take a look at the source of the
-existing parsers on `GitHub
+existing `parsers on GitHub
 <https://github.com/eldridgejm/panprob/tree/main/panprob/parsers>`_ for inspiration.
 
 If the format you're writing a parser for is based on a standard markup (such
@@ -147,5 +147,5 @@ then converts the resulting AST into a `panprob` AST.
 On the other hand, if you'd like to write a renderer for a new format, you can
 do that too. A renderer is simply a function that takes a :class:`Problem`
 object as input and returns a string as output. You can take a look at the
-source of the existing renderers on `GitHub
+source of the existing `renderers on GitHub
 <https://github.com/eldridgejm/panprob/tree/main/panprob/renderers>`_.

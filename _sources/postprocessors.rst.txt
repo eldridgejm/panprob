@@ -30,20 +30,21 @@ Paragraphize
 
 A postprocessor that is most useful for writing simpler parsers.
 
-:class:`Text` and inline content, such as :class:`InlineMath`,
-:class:`InlineCode`, and :class:`InlineResponseBox`, cannot appear directly
-under, e.g., a :class:`Problem` in an AST; they must instead be contained
-within a :class:`Paragraph`. However, it can be difficult for the parser to
-know where a paragraph should be created during parse time. Rather, it is
-often easier to infer this *post hoc*, after the full AST has been built.
+:class:`panprob.ast.Text` and inline content, such as
+:class:`panprob.ast.InlineMath`, :class:`panprob.ast.InlineCode`, and
+:class:`panprob.ast.InlineResponseBox`, cannot appear directly under, e.g., a
+:class:`panprob.ast.Problem` in an AST; they must instead be contained within a
+:class:`panprob.ast.Paragraph`. However, it can be difficult for the parser to
+know where a paragraph should be created during parse time. Rather, it is often
+easier to infer this *post hoc*, after the full AST has been built.
 
-The :class:`Blob` special node type exists to enable such a *post hoc*
-approach to creating paragraphs. Instead of placing text directly into a
-:class:`Paragraph` during parsing, the parser puts one or more pieces of
-text into a :class:`Blob`. Then, after the AST has been created, a
-post-processing step is run that converts all :class:`Blob` nodes into
-:class:`Paragraph` nodes by merging or splitting them as necessary. This
-post-processing step is implemented in the
-:func:`panprob.postprocessors.paragraphize` function:
+The :class:`panprob.ast.Blob` special node type exists to enable such a *post
+hoc* approach to creating paragraphs. Instead of placing text directly into a
+:class:`panprob.ast.Paragraph` during parsing, the parser puts one or more
+pieces of text into a :class:`panprob.ast.Blob`. Then, after the AST has been
+created, a post-processing step is run that converts all
+:class:`panprob.ast.Blob` nodes into :class:`panprob.ast.Paragraph` nodes by
+merging or splitting them as necessary. This post-processing step is
+implemented in the :func:`panprob.postprocessors.paragraphize` function:
 
 .. autofunction:: panprob.postprocessors.paragraphize

@@ -151,20 +151,21 @@ necessary directories will be created.</p></li>
 <section id="paragraphize">
 <h2>Paragraphize<a class="headerlink" href="#paragraphize" title="Link to this heading"></a></h2>
 <p>A postprocessor that is most useful for writing simpler parsers.</p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Text</span></code> and inline content, such as <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineMath</span></code>,
-<code class="xref py py-class docutils literal notranslate"><span class="pre">InlineCode</span></code>, and <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResponseBox</span></code>, cannot appear directly
-under, e.g., a <code class="xref py py-class docutils literal notranslate"><span class="pre">Problem</span></code> in an AST; they must instead be contained
-within a <code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code>. However, it can be difficult for the parser to
-know where a paragraph should be created during parse time. Rather, it is
-often easier to infer this <em>post hoc</em>, after the full AST has been built.</p>
-<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> special node type exists to enable such a <em>post hoc</em>
-approach to creating paragraphs. Instead of placing text directly into a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code> during parsing, the parser puts one or more pieces of
-text into a <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code>. Then, after the AST has been created, a
-post-processing step is run that converts all <code class="xref py py-class docutils literal notranslate"><span class="pre">Blob</span></code> nodes into
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Paragraph</span></code> nodes by merging or splitting them as necessary. This
-post-processing step is implemented in the
-<a class="reference internal" href="#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a> function:</p>
+<p><a class="reference internal" href="ast.html#panprob.ast.Text" title="panprob.ast.Text"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Text</span></code></a> and inline content, such as
+<a class="reference internal" href="ast.html#panprob.ast.InlineMath" title="panprob.ast.InlineMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineMath</span></code></a>, <a class="reference internal" href="ast.html#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineCode</span></code></a>, and
+<a class="reference internal" href="ast.html#panprob.ast.InlineResponseBox" title="panprob.ast.InlineResponseBox"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineResponseBox</span></code></a>, cannot appear directly under, e.g., a
+<a class="reference internal" href="ast.html#panprob.ast.Problem" title="panprob.ast.Problem"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Problem</span></code></a> in an AST; they must instead be contained within a
+<a class="reference internal" href="ast.html#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Paragraph</span></code></a>. However, it can be difficult for the parser to
+know where a paragraph should be created during parse time. Rather, it is often
+easier to infer this <em>post hoc</em>, after the full AST has been built.</p>
+<p>The <a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a> special node type exists to enable such a <em>post
+hoc</em> approach to creating paragraphs. Instead of placing text directly into a
+<a class="reference internal" href="ast.html#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Paragraph</span></code></a> during parsing, the parser puts one or more
+pieces of text into a <a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a>. Then, after the AST has been
+created, a post-processing step is run that converts all
+<a class="reference internal" href="ast.html#panprob.ast.Blob" title="panprob.ast.Blob"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Blob</span></code></a> nodes into <a class="reference internal" href="ast.html#panprob.ast.Paragraph" title="panprob.ast.Paragraph"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.Paragraph</span></code></a> nodes by
+merging or splitting them as necessary. This post-processing step is
+implemented in the <a class="reference internal" href="#panprob.postprocessors.paragraphize" title="panprob.postprocessors.paragraphize"><code class="xref py py-func docutils literal notranslate"><span class="pre">panprob.postprocessors.paragraphize()</span></code></a> function:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="panprob.postprocessors.paragraphize">
 <span class="sig-prename descclassname"><span class="pre">panprob.postprocessors.</span></span><span class="sig-name descname"><span class="pre">paragraphize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.InternalNode" title="panprob.ast._types.InternalNode"><span class="pre">InternalNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ast.html#panprob.ast.InternalNode" title="panprob.ast._types.InternalNode"><span class="pre">InternalNode</span></a></span></span><a class="headerlink" href="#panprob.postprocessors.paragraphize" title="Link to this definition"></a></dt>
