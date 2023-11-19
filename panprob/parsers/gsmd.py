@@ -10,7 +10,7 @@ For details about this format, see the `Gradescope documentation
 
 """
 
-from .. import ast, exceptions
+from .. import ast, exceptions, postprocessors
 
 import typing
 
@@ -235,7 +235,13 @@ class _InlineResponseBox(marko.block.BlockElement):
         # element: a marko.block.Document object. Its only child should be a
         # marko Paragraph object, and its children are the actual contents of
         # the answer:
-        children = _MARKO_PARSER.parse(answer).children[0].children
+        try:
+            children = _MARKO_PARSER.parse(answer).children[0].children
+        except IndexError:
+            raise exceptions.ParseError(
+                "Inline response box does not contain an answer."
+            )
+
         source.consume()
         return cls(children)
 
@@ -316,12 +322,12 @@ def _convert_document(marko_element, convert):
 
 @_converter(marko.block.BlankLine)
 def _convert_blank_line(marko_element, convert):
-    return ast.Text("\n")
+    return ast.Blob(children=[])
 
 
 @_converter(marko.inline.LineBreak)
 def _convert_line_break(marko_element, convert):
-    return ast.Text("\n")
+    return ast.Blob(children=[])
 
 
 @_converter(marko.block.Paragraph)
@@ -331,17 +337,20 @@ def _convert_paragraph(marko_element, convert):
 
 @_converter(marko.inline.RawText)
 def _convert_raw_text(marko_element, convert):
-    return ast.Text(marko_element.children)
+    child = ast.Text(marko_element.children)
+    return ast.Blob(children=[child])
 
 
 @_converter(marko.inline.Emphasis)
 def _convert_emphasis(marko_element, convert):
-    return ast.Text(marko_element.children[0].children, italic=True)
+    child = ast.Text(marko_element.children[0].children, italic=True)
+    return ast.Blob(children=[child])
 
 
 @_converter(marko.inline.StrongEmphasis)
 def _convert_strong_emphasis(marko_element, convert):
-    return ast.Text(marko_element.children[0].children, bold=True)
+    child = ast.Text(marko_element.children[0].children, bold=True)
+    return ast.Blob(children=[child])
 
 
 # code ---------------------------------------------------------------------------------
@@ -349,7 +358,8 @@ def _convert_strong_emphasis(marko_element, convert):
 
 @_converter(marko.inline.CodeSpan)
 def _convert_code_span(marko_element, convert):
-    return ast.InlineCode("text", marko_element.children)
+    child = ast.InlineCode("text", marko_element.children)
+    return ast.Blob(children=[child])
 
 
 @_converter(marko.block.FencedCode)
@@ -362,7 +372,8 @@ def _convert_fenced_code(marko_element, convert):
 
 @_converter(_InlineMath)
 def _convert_inline_math(marko_element, convert):
-    return ast.InlineMath(marko_element.latex)
+    child = ast.InlineMath(marko_element.latex)
+    return ast.Blob(children=[child])
 
 
 # media --------------------------------------------------------------------------------
@@ -375,7 +386,7 @@ def _convert_image(marko_element, convert):
 
 @_converter(marko.inline.Image)
 def _convert_inline_image(marko_element, convert):
-    raise ValueError("Inline images are not supported")
+    raise exceptions.ParseError("Inline images are not supported")
 
 
 # response areas and solutions ---------------------------------------------------------
@@ -413,9 +424,22 @@ def _convert_multiple_select(marko_element, convert):
 
 @_converter(_InlineResponseBox)
 def _convert_inline_response_box(marko_element, convert):
-    return ast.InlineResponseBox(
-        children=[convert(child) for child in marko_element.answer]
-    )
+    answer = [convert(child) for child in marko_element.answer]
+
+    # the answer will be a list of blobs, each should have a single child
+    if not all(len(blob.children) == 1 for blob in answer):
+        raise exceptions.ParseError(
+            "Inline response box answer should be a single paragraph"
+        )
+
+    answer = [blob.children[0] for blob in answer]
+
+    def is_empty_text(node):
+        return isinstance(node, ast.Text) and node.text.strip() == ""
+
+    answer = [node for node in answer if not is_empty_text(node)]
+
+    return ast.InlineResponseBox(children=answer)
 
 
 # parser ===============================================================================
@@ -436,8 +460,20 @@ def parse(md: str) -> ast.Problem:
 
     Raises
     ------
-    panprob.exceptions.Error
+    panprob.exceptions.ParseError
         If the source cannot be parsed for some known reason.
+
+    Notes
+    -----
+
+    This parser does not support inline images, such as:
+
+    .. code-block:: markdown
+
+        This is an image: ![alt text](path/to/image.png)
+
+    Images should instead be placed on their own line. If an inline image is
+    encountered, a :class:`panprob.exceptions.ParseError` will be raised.
 
     """
     marko_tree = _MARKO_PARSER.parse(md)
@@ -445,11 +481,15 @@ def parse(md: str) -> ast.Problem:
     def _convert_marko_element(marko_element):
         """Recursively convert a Marko node to an AST node."""
         if type(marko_element) not in _CONVERTERS:
-            raise exceptions.Error(
+            raise exceptions.ParseError(
                 f"Gradescope markdown parser found unsupported node {marko_element}"
             )
 
         converter = _CONVERTERS[type(marko_element)]
         return converter(marko_element, _convert_marko_element)
 
-    return _convert_marko_element(marko_tree)
+    tree = _convert_marko_element(marko_tree)
+
+    tree = postprocessors.paragraphize(tree)
+    assert isinstance(tree, ast.Problem)
+    return tree

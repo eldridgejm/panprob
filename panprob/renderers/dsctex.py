@@ -1,8 +1,9 @@
 """Renders a problem to DSCTeX."""
 
 from textwrap import dedent, indent
+import textwrap
 
-from .. import ast
+from .. import ast, exceptions
 
 from . import _util
 
@@ -62,13 +63,10 @@ def _render_text(node: ast.Text, render_child):
 
 @_renderer(ast.Paragraph)
 def _render_paragraph(node: ast.Paragraph, render_child):
-    contents = "".join(render_child(child) for child in node.children)
-    contents = dedent(contents)
-    return dedent(
-        rf"""
-        {contents}
-        """
-    )
+    contents = "".join(render_child(child) for child in node.children).strip()
+    contents = textwrap.fill(contents, width=80)
+
+    return "\n\n" + contents + "\n\n"
 
 
 # code ---------------------------------------------------------------------------------
@@ -198,13 +196,15 @@ def _render_imagefile(node: ast.ImageFile, render_child):
     ).format(path=node.relative_path)
 
 
-# renderer =============================================================================
+# render() =============================================================================
 
 
 def render(problem: ast.Problem, overrides=None) -> str:
     """Render a problem to a DSCTeX problem in LaTeX.
 
-    This render is capable of rendering all node types from :mod:`panprob.ast`.
+    This renderer is capable of rendering all node types from
+    :mod:`panprob.ast`, except for the special nodes :class:`panprob.ast.Blob`
+    and :class:`panprob.ast.ParBreak`, which should not appear in the AST.
 
     Parameters
     ----------
@@ -219,6 +219,12 @@ def render(problem: ast.Problem, overrides=None) -> str:
     -------
     str
         The problem rendered as a LaTeX string.
+
+    Raises
+    ------
+    RenderError
+        If there is an issue rendering this tree, such as when an unkown AST
+        node type is encountered.
 
     Notes
     -----
@@ -237,7 +243,10 @@ def render(problem: ast.Problem, overrides=None) -> str:
         if type(node) in renderers:
             return renderers[type(node)](node, _render_node)
         else:
-            raise NotImplementedError(f"no DSCTeX renderer for {type(node)}")
+            raise exceptions.RenderError(f"no DSCTeX renderer for {type(node)}")
 
     latex = _render_node(problem)
-    return _util.collapse_empty_lines(latex)
+    latex = _util.collapse_empty_lines(latex)
+    latex = latex.strip()
+
+    return latex

@@ -19,7 +19,11 @@ def test_parses_problem_with_text_inside():
 
     expected = ast.Problem(
         children=[
-            ast.Text("hello world"),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello world"),
+                ]
+            ),
         ]
     )
 
@@ -49,15 +53,23 @@ def test_subproblems():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n    This is the problem.\n\n    "),
+            ast.Paragraph(children=[ast.Text("This is the problem.")]),
             ast.Subproblem(
                 children=[
-                    ast.Text("\n            hello world\n        "),
+                    ast.Paragraph(
+                        children=[
+                            ast.Text("hello world"),
+                        ]
+                    ),
                 ]
             ),
             ast.Subproblem(
                 children=[
-                    ast.Text("\n            goodbye world\n        "),
+                    ast.Paragraph(
+                        children=[
+                            ast.Text("goodbye world"),
+                        ]
+                    ),
                 ]
             ),
         ]
@@ -82,8 +94,12 @@ def test_parses_problem_with_bold_text():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello "),
-            ast.Text("world", bold=True),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello "),
+                    ast.Text("world", bold=True),
+                ]
+            ),
         ]
     )
 
@@ -123,8 +139,12 @@ def test_parses_problem_with_inline_math():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello "),
-            ast.InlineMath(r"f(x) \geq 42"),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello "),
+                    ast.InlineMath(r"f(x) \geq 42"),
+                ]
+            ),
         ]
     )
 
@@ -142,7 +162,11 @@ def test_parses_problem_with_dollar_dollar_math():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello "),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello"),
+                ]
+            ),
             ast.DisplayMath("f(x) = 42"),
         ]
     )
@@ -161,7 +185,11 @@ def test_parses_problem_with_display_math():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello "),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello"),
+                ]
+            ),
             ast.DisplayMath("f(x) = 42"),
         ]
     )
@@ -206,7 +234,11 @@ def test_parses_problem_with_mintinline_code():
 
     assert tree == ast.Problem(
         children=[
-            ast.InlineCode("python", "def f(x): return x + 1"),
+            ast.Paragraph(
+                children=[
+                    ast.InlineCode("python", "def f(x): return x + 1"),
+                ]
+            ),
         ]
     )
 
@@ -256,19 +288,134 @@ def test_problem_with_multiple_choices():
                 children=[
                     ast.Choice(
                         children=[
-                            ast.Text(" hello "),
-                            ast.Text("world", bold=True),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("hello "),
+                                    ast.Text("world", bold=True),
+                                ]
+                            ),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text(" goodbye world\n        "),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("goodbye world"),
+                                ]
+                            ),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text(" goodbye world\n    "),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("goodbye world"),
+                                ]
+                            ),
                         ],
+                        correct=True,
+                    ),
+                ]
+            )
+        ]
+    )
+
+
+def test_problem_with_choices_spread_across_multiple_lines():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                \begin{choices}
+                    \choice {
+
+                        hello \textbf{world}
+
+                    }
+                    \choice {
+
+                        goodbye world
+
+                    }
+                    \correctchoice {
+
+                        ok world
+
+                    }
+                \end{choices}
+            \end{prob}
+            """
+        )
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.MultipleChoice(
+                children=[
+                    ast.Choice(
+                        children=[
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("hello "),
+                                    ast.Text("world", bold=True),
+                                ]
+                            ),
+                        ]
+                    ),
+                    ast.Choice(
+                        children=[
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("goodbye world"),
+                                ]
+                            ),
+                        ]
+                    ),
+                    ast.Choice(
+                        children=[
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("ok world"),
+                                ]
+                            ),
+                        ],
+                        correct=True,
+                    ),
+                ]
+            )
+        ]
+    )
+
+
+def test_problem_with_choices_spread_across_multiple_lines_with_empty_choices():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                \begin{choices}
+                    \choice {
+
+                    }
+                    \choice {
+
+                    }
+                    \correctchoice {
+
+                    }
+                \end{choices}
+            \end{prob}
+            """
+        )
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.MultipleChoice(
+                children=[
+                    ast.Choice(children=[]),
+                    ast.Choice(children=[]),
+                    ast.Choice(
+                        children=[],
                         correct=True,
                     ),
                 ]
@@ -298,18 +445,30 @@ def test_problem_with_multiple_select():
                 children=[
                     ast.Choice(
                         children=[
-                            ast.Text(" hello "),
-                            ast.Text("world", bold=True),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("hello "),
+                                    ast.Text("world", bold=True),
+                                ]
+                            ),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text(" goodbye world\n        "),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("goodbye world"),
+                                ]
+                            ),
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text(" goodbye world\n    "),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("goodbye world"),
+                                ]
+                            ),
                         ],
                         correct=True,
                     ),
@@ -317,54 +476,6 @@ def test_problem_with_multiple_select():
             )
         ]
     )
-
-
-def test_problem_with_code_in_multiple_choice():
-    tree = parse(
-        dedent(
-            r"""
-            \begin{prob}
-                \begin{choices}
-                    \choice hello \textbf{world}
-                    \choice \begin{minted}{python}
-                    def f(x):
-                        return x + 1
-                    \end{minted}
-                \end{choices}
-            \end{prob}
-            """
-        )
-    )
-
-    expected = ast.Problem(
-        children=[
-            ast.MultipleChoice(
-                children=[
-                    ast.Choice(
-                        children=[
-                            ast.Text(" hello "),
-                            ast.Text("world", bold=True),
-                        ]
-                    ),
-                    ast.Choice(
-                        children=[
-                            ast.Code(
-                                "python",
-                                dedent(
-                                    r"""
-                                        def f(x):
-                                            return x + 1
-                                    """
-                                ),
-                            ),
-                        ],
-                    ),
-                ]
-            )
-        ]
-    )
-
-    assert tree == expected
 
 
 def test_problem_with_solution():
@@ -383,10 +494,18 @@ def test_problem_with_solution():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello world\n    "),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello world"),
+                ]
+            ),
             ast.Solution(
                 children=[
-                    ast.Text("\n        goodbye world\n    "),
+                    ast.Paragraph(
+                        children=[
+                            ast.Text("goodbye world"),
+                        ]
+                    ),
                 ]
             ),
         ]
@@ -407,7 +526,11 @@ def test_problem_with_Tf():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello world\n    "),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello world"),
+                ]
+            ),
             ast.TrueFalse(solution=True),
         ]
     )
@@ -427,7 +550,11 @@ def test_problem_with_tF():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello world\n    "),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello world"),
+                ]
+            ),
             ast.TrueFalse(solution=False),
         ]
     )
@@ -446,11 +573,50 @@ def test_inline_response_box():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    The answer is: "),
-            ast.InlineResponseBox(
+            ast.Paragraph(
                 children=[
-                    ast.Text("some math: "),
-                    ast.InlineMath(r"f(x) \geq 42"),
+                    ast.Text("The answer is: "),
+                    ast.InlineResponseBox(
+                        children=[
+                            ast.Text("some math: "),
+                            ast.InlineMath(r"f(x) \geq 42"),
+                        ]
+                    ),
+                ]
+            ),
+        ]
+    )
+
+
+def test_inline_responsebox_on_own_line_creates_a_new_paragraph():
+    latex = dedent(
+        r"""
+        \begin{prob}
+
+            And this is an inline response box:
+
+            \inlineresponsebox{yes}
+
+        \end{prob}
+        """
+    )
+
+    tree = parse(latex)
+
+    assert tree == ast.Problem(
+        children=[
+            ast.Paragraph(
+                children=[
+                    ast.Text("And this is an inline response box:"),
+                ]
+            ),
+            ast.Paragraph(
+                children=[
+                    ast.InlineResponseBox(
+                        children=[
+                            ast.Text("yes"),
+                        ]
+                    )
                 ]
             ),
         ]
@@ -491,13 +657,17 @@ def test_overriding_existing_converter():
     """
 
     def convert_textbf(node, children):
-        return ast.Text("IT WORKED", italic=True)
+        return ast.Paragraph(children=[ast.Text("IT WORKED", italic=True)])
 
     tree = parse(latex, command_converters={"textbf": convert_textbf})
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("IT WORKED", italic=True),
+            ast.Paragraph(
+                children=[
+                    ast.Text("IT WORKED", italic=True),
+                ]
+            ),
         ]
     )
 
@@ -510,13 +680,19 @@ def test_extending_with_new_converter():
     """
 
     def convert_python(command, children):
-        return ast.InlineCode("python", command.args[0].raw_contents)
+        return ast.Paragraph(
+            children=[ast.InlineCode("python", command.args[0].raw_contents)]
+        )
 
     tree = parse(latex, command_converters={"python": convert_python})
 
     assert tree == ast.Problem(
         children=[
-            ast.InlineCode("python", "this"),
+            ast.Paragraph(
+                children=[
+                    ast.InlineCode("python", "this"),
+                ]
+            ),
         ]
     )
 
@@ -531,7 +707,7 @@ def test_raises_when_an_unknown_command_is_used():
     \end{prob}
     """
 
-    with raises(exceptions.Error):
+    with raises(exceptions.ParseError):
         parse(latex)
 
 
@@ -544,5 +720,58 @@ def test_raises_when_an_unknown_environment_is_used():
     \end{prob}
     """
 
-    with raises(exceptions.Error):
+    with raises(exceptions.ParseError):
         parse(latex)
+
+
+def test_raises_when_input_has_more_than_one_problem():
+    latex = r"""
+    \begin{prob}
+        this
+    \end{prob}
+
+    \begin{soln}
+        that
+    \end{soln}
+    """
+
+    with raises(exceptions.ParseError):
+        parse(latex)
+
+
+def test_raises_when_the_problem_is_in_an_enviroment_that_isnt_a_problem():
+    latex = r"""
+    \begin{soln}
+        testing
+    \end{soln}
+    """
+
+    with raises(exceptions.ParseError):
+        parse(latex)
+
+
+def test_raises_if_inline_responsebox_doesnt_contain_single_paragraph():
+    latex = r"""
+    \begin{prob}
+        \inlineresponsebox{
+                this is the first paragraph
+
+                and this is the second
+        }
+    \end{prob}
+    """
+
+    with raises(exceptions.ParseError):
+        parse(latex)
+
+
+def test_raises_when_input_is_blank():
+    with raises(exceptions.ParseError):
+        parse(
+            dedent(
+                """
+
+
+                """
+            )
+        )

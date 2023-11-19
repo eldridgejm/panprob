@@ -150,7 +150,7 @@ def _render_choice(node: ast.Choice, render_child, rectangle=False):
     # check that the contents are only a single line, because Gradescope markdown
     # does not support multi-line choice options
     if len(contents.split("\n")) > 1:
-        raise ValueError(
+        raise exceptions.RenderError(
             "Gradescope markdown does not support multi-line choice options"
         )
 
@@ -204,9 +204,11 @@ def _render_imagefile(node: ast.ImageFile, render_child):
     ).format(path=node.relative_path)
 
 
-# renderer =============================================================================
+# render() =============================================================================
 
-_UNSUPPORTED = {
+# these node types are unsupported by this renderer. We raise an error with a
+# helpful message if we encounter them.
+_UNSUPPORTED_NODE_TYPES = {
     ast.CodeFile: (
         "The problem contains a reference to a code file, but the "
         "Gradescope markdown renderer does not support this."
@@ -217,7 +219,15 @@ _UNSUPPORTED = {
 def render(problem: ast.Problem, overrides=None) -> str:
     """Render a problem in Gradescope markdown.
 
-    This render is capable of rendering all node types from :mod:`panprob.ast`.
+    This renderer is capable of rendering all node types from
+    :mod:`panprob.ast` except for :class:`panprob.ast.CodeFile` and special
+    nodes, like :class:`panprob.ast.Blob` and :class:`panprob.ast.ParBreak`.
+
+    :class:`panprob.ast.CodeFile` is not supported because Gradescope markdown
+    does not support code files. Gradescope markdown also does not support
+    complex multiple choice options with multiple lines of text, so
+    :class:`panprob.ast.Choice` nodes with multiple lines of text will raise
+    :class:`panprob.exceptions.RenderError`.
 
     Parameters
     ----------
@@ -233,6 +243,12 @@ def render(problem: ast.Problem, overrides=None) -> str:
     str
         The problem rendered as a markdown string.
 
+    Raises
+    ------
+    RenderError
+        If there is an issue rendering this tree, such as when an unkown AST
+        node type is encountered.
+
     Notes
     -----
     A renderer function is called with two arguments:
@@ -247,15 +263,18 @@ def render(problem: ast.Problem, overrides=None) -> str:
     renderers = {**_RENDERERS, **(overrides or {})}
 
     def _render_node(node: ast.Node):
-        if type(node) in _UNSUPPORTED:
-            raise exceptions.Error(_UNSUPPORTED[type(node)])
+        if type(node) in _UNSUPPORTED_NODE_TYPES:
+            raise exceptions.RenderError(_UNSUPPORTED_NODE_TYPES[type(node)])
 
         if type(node) in renderers:
             return renderers[type(node)](node, _render_node)
         else:
-            raise exceptions.Error(
+            raise exceptions.RenderError(
                 f"no Gradescope markdown renderer for AST node '{type(node).__name__}'"
             )
 
     latex = _render_node(problem)
-    return _util.collapse_empty_lines(latex)
+    latex = _util.collapse_empty_lines(latex)
+    latex = latex.strip()
+
+    return latex

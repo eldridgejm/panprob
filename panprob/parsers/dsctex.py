@@ -5,7 +5,7 @@ A problem written with DSCTeX looks like the below:
 .. code:: latex
 
     \begin{problem}
-        What is the largest building at UCSD?
+        What is the most famous building at UCSD?
 
         \begin{solution}
             Geisel Library, probably.
@@ -24,7 +24,8 @@ import textwrap
 
 import TexSoup
 
-from .. import ast, util, exceptions
+from .. import ast, util, postprocessors
+from ..exceptions import ParseError
 
 
 # To make it easy to extend, this module follows a two-step process to parse
@@ -118,7 +119,7 @@ class Environment:
 
 
 def _parse_source_into_latex_ast(latex: str) -> Environment:
-    """Parse the LaTeX source into a tree of Command, Environment, and Text objects.
+    """Parse the LaTeX source into a tree of Command, Environment, and str objects.
 
     This function uses the TexSoup package to do the heavy lifting, but it returns
     simplified versions of the TexSoup types TexSoup.TexCmd and TexSoup.TexEnv.
@@ -133,6 +134,7 @@ def _parse_source_into_latex_ast(latex: str) -> Environment:
         return node
 
     def _convert_soup_node(soup_node):
+        """Convert a TexSoup node into a Command, Environment, or str object."""
         if isinstance(soup_node, str):
             return soup_node
         elif isinstance(soup_node, TexSoup.data.TexCmd):
@@ -154,7 +156,7 @@ def _parse_source_into_latex_ast(latex: str) -> Environment:
                 raw_contents="".join(str(c) for c in soup_node.contents[n_args:]),
             )
         else:
-            raise ValueError(f"Unknown type: {type(soup_node)}")
+            raise RuntimeError(f"Unknown TeXSoup type: {type(soup_node)}")
 
     return _ensure_environment(_convert_soup_node(soup.expr))
 
@@ -203,18 +205,6 @@ def _env_converter(name):
     return decorator
 
 
-# the LaTeX AST parser above creates an Environment node for the entire document; its
-# name is `[tex]`. We use this as the entry point for the conversion process:
-
-
-@_env_converter("[tex]")
-def _convert_tex(env: Environment, convert):
-    # there should be only one child
-    if len(env.contents) != 1:
-        raise ValueError("Expected exactly one child of [tex] environment")
-    return convert(env.contents[0])
-
-
 # problems and subproblems -------------------------------------------------------------
 
 
@@ -246,12 +236,12 @@ def _convert_subprob(env: Environment, convert):
 
 @_cmd_converter("textbf")
 def _convert_textbf(cmd: Command, convert):
-    return ast.Text(cmd.args[0].raw_contents, bold=True)
+    return ast.Blob(children=[ast.Text(cmd.args[0].raw_contents, bold=True)])
 
 
 @_cmd_converter("textit")
 def _convert_textit(cmd: Command, convert):
-    return ast.Text(cmd.args[0].raw_contents, italic=True)
+    return ast.Blob(children=[ast.Text(cmd.args[0].raw_contents, italic=True)])
 
 
 # math ---------------------------------------------------------------------------------
@@ -259,7 +249,7 @@ def _convert_textit(cmd: Command, convert):
 
 @_env_converter("$")
 def _convert_inline_math(env: Environment, convert):
-    return ast.InlineMath(env.raw_contents)
+    return ast.Blob(children=[ast.InlineMath(env.raw_contents)])
 
 
 @_env_converter("$$")
@@ -299,8 +289,12 @@ def _convert_inputminted(cmd: Command, convert):
 
 @_cmd_converter("mintinline")
 def _convert_mintinline(cmd: Command, convert):
-    return ast.InlineCode(
-        language=cmd.args[0].raw_contents, code=cmd.args[1].raw_contents
+    return ast.Blob(
+        children=[
+            ast.InlineCode(
+                language=cmd.args[0].raw_contents, code=cmd.args[1].raw_contents
+            )
+        ]
     )
 
 
@@ -314,23 +308,90 @@ def _convert_soln(env: Environment, convert):
 
 @_env_converter("choices")
 def _convert_choices(env: Environment, convert):
-    # the .contents of the environment will be a list, the first entry being a choice
-    # (or correctchoice) command, followed by one or more nodes containing the text
-    # of that choice, until eventually there is another choice/correctchoice command
-    # node. we want to group these together into a list of (choice, text) tuples.
+    # there are three ways of writing the content of a choice:
+    #
+    #   1) inline, like: \choice This is a \textbf{choice}
+    #   2) command-form, like:
+    #
+    #           \choice { This is a \textbf{choice} }
+    #
+    #   3) mixed, like:
+    #
+    #           \choice { This is a } \textbf{choice}
+    #
+    # The last one is odd, but it's a possibility...
+
+    # The first type manifests as env.contents containing a list of objects, some of
+    # them Choice commands and some of them representing the content of the choices:
+    #
+    #   [
+    #       Command("\choice"),
+    #       "This is a ",
+    #       Command("textbf", args=[
+    #           Environment(name="BraceGroup", contents=["choice"])
+    #       ]),
+    #       Command("\choice"),
+    #       ...
+    #   ]
+
+    # The second type manifests as env.contents containing a list of Command objects
+    # only, with the contents of the braces stored in the args of the command:
+    #
+    #   [
+    #       Command("\choice", args=[
+    #           Environment(name="BraceGroup", contents=[
+    #               "This is a ",
+    #               Command("textbf", args=[
+    #                   Environment(name="BraceGroup", contents=["choice"])
+    #               ])
+    #           ])
+    #       ]),
+    #       ...
+    #   ]
+
+    # The third type manifests as env.contents containing a list of objects, some of
+    # them Choice commands with args and some not:
+    #
+    #   [
+    #       Command("\choice", args=[
+    #           Environment(name="BraceGroup", contents=[
+    #               "This is a ",
+    #           ])
+    #       ]),
+    #       Command("textbf", args=[
+    #           Environment(name="BraceGroup", contents=["choice"])
+    #       ]),
+    #       ...
+    #   ]
+
+    # The general strategy for parsing these is as follows:
+    #
+    #   1) group env.contents by choice nodes and non-choice nodes.
+    #   2) for each choice node, start with an empty list of contents
+    #       a) if the choice node has args, add them to the contents
+    #       b) add all of the non-choice nodes to the contents, up until the next
+    #          choice node
+
     is_choice = lambda n: isinstance(n, Command) and n.name in {
         "choice",
         "correctchoice",
     }
     choices = util.segment(env.contents, is_choice)
 
-    # having segmented the contents into separate choices, we now create AST nodes
-    # for each choice:
-    def make_choice_node(choice):
-        cmd, *rest = choice
-        return ast.Choice(
-            correct=cmd.name == "correctchoice", children=[convert(x) for x in rest]
-        )
+    # every segment starts with a Choice command and zero or more non-choice nodes
+    # (strings, commands, environments, etc.)
+    def make_choice_node(segment):
+        choice_command, *rest = segment
+
+        choice_children = []
+        if choice_command.args:
+            choice_children.extend(convert(c) for c in choice_command.args[0].contents)
+
+        choice_children.extend(convert(c) for c in rest)
+
+        correct = choice_command.name == "correctchoice"
+
+        return ast.Choice(correct=correct, children=choice_children)
 
     choice_nodes = [make_choice_node(choice) for choice in choices]
 
@@ -352,7 +413,46 @@ def _convert_tF(cmd: Command, convert):
 
 @_cmd_converter("inlineresponsebox")
 def _convert_inlineresponsebox(cmd: Command, convert):
-    return ast.InlineResponseBox(children=[convert(c) for c in cmd.args[-1].contents])
+    contents = [convert(c) for c in cmd.args[-1].contents]
+
+    # each child should be a Blob with a single child
+    if not all(len(blob.children) == 1 for blob in contents):
+        raise ParseError("inlineresponsebox contents must be a single paragraph")
+
+    contents = [blob.children[0] for blob in contents]
+    return ast.InlineResponseBox(children=contents)
+
+
+# blobify ==============================================================================
+
+
+def _blobify(s: str) -> ast.Blob:
+    """Creates a :class:`Blob` from a string.
+
+    This splits the string on double newlines, and creates a :class:`Text` node
+    for each chunk, separated by :class:`ParBreak` nodes.
+
+    Parameters
+    ----------
+    s : str
+        The string to convert.
+
+    Returns
+    -------
+    Blob
+        The resulting blob.
+
+    """
+    chunks = iter(s.split("\n\n"))
+    children = [ast.Text(next(chunks))]
+
+    for chunk in chunks:
+        children.append(ast.ParBreak())
+        if not chunk.strip():
+            continue
+        children.append(ast.Text(chunk))
+
+    return ast.Blob(children=children)
 
 
 # parse() ==============================================================================
@@ -381,7 +481,7 @@ def parse(
 
     Raises
     ------
-    panprob.exceptions.Error
+    panprob.ParseError
         If the source cannot be parsed for some reason. For example, if it
         contains an unrecognized command or environment.
 
@@ -395,12 +495,8 @@ def parse(
     Converter functions should accept two arguments: 1) the LaTeX
     :class:`Environment` or :class:`Command` node to convert, and 2) a function
     that can be used as a callback to recursively convert the children of the
-    node, if necessary. The converter function should return a panprob AST
-    node. See the documentation for examples.
-
-    The parser is not capable of accurately detecting the paragraph structure
-    in the source. To add paragraph breaks to the parsed problem post hoc, use
-    :func:`panprob.ast.postprocessors.paragraphize`.
+    node, if necessary. The converter function should return a `panprob` AST
+    node. See the documentation on extending `panprob` for examples.
 
     """
 
@@ -415,12 +511,10 @@ def parse(
     try:
         [prob_node] = latex_ast.contents
     except ValueError:
-        raise exceptions.Error(
-            "The source must contain exactly one problem environment."
-        )
+        raise ParseError("The source must contain exactly one problem environment.")
 
     if not (isinstance(prob_node, Environment) and prob_node.name == "prob"):
-        raise exceptions.Error("The problem must be wrapped in a `prob` environment.")
+        raise ParseError("The problem must be wrapped in a `prob` environment.")
 
     # next, we recursively convert these LaTeX nodes into panprob AST nodes.
     # default converters are defined above, but the user can override / extend them
@@ -433,24 +527,29 @@ def parse(
     # children:
     def convert(latex_node: Union[Command, Environment, str]) -> ast.Node:
         if isinstance(latex_node, str):
-            return ast.Text(latex_node)
+            return _blobify(latex_node)
         elif isinstance(latex_node, Command):
             converters = cmd_converters
         elif isinstance(latex_node, Environment):
             converters = env_converters
         else:
-            raise exceptions.Error(f"Unknown type: {type(latex_node)}")
+            raise ParseError(f"Unknown type: {type(latex_node)}")
 
         if latex_node.name not in converters:
             msg = (
                 "DSCTeX parser encountered unsupported LaTeX "
                 f"{type(latex_node).__name__} '{latex_node.name}'"
             )
-            raise exceptions.Error(msg)
+            raise ParseError(msg)
 
-        # we pass this
+        # we pass this function to the converter so that it can recursively convert
+        # its children:
         return converters[latex_node.name](latex_node, convert)
 
     tree = convert(prob_node)
+
     assert isinstance(tree, ast.Problem)
+    tree = postprocessors.paragraphize(tree)
+    assert isinstance(tree, ast.Problem)
+
     return tree

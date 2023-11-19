@@ -1,5 +1,5 @@
 from panprob import ast
-from panprob.ast.postprocessors import subsume_code
+from panprob.postprocessors import subsume_code
 
 
 def test_subsume_code_reads_code_into_ast(tmpdir):
@@ -7,14 +7,17 @@ def test_subsume_code_reads_code_into_ast(tmpdir):
         fileob.write("print('hello world')\n")
 
     tree = ast.Problem(
-        children=[ast.Text("This is some code:"), ast.CodeFile("python", "testing.py")]
+        children=[
+            ast.Paragraph(children=[ast.Text("This is some code:")]),
+            ast.CodeFile("python", "testing.py"),
+        ]
     )
 
     resulting_tree = subsume_code(tree, root=tmpdir)
 
     assert resulting_tree == ast.Problem(
         children=[
-            ast.Text("This is some code:"),
+            ast.Paragraph(children=[ast.Text("This is some code:")]),
             ast.Code("python", "print('hello world')\n"),
         ]
     )

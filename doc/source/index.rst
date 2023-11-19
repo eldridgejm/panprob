@@ -1,12 +1,12 @@
-.. panprob documentation master file, created by
-   sphinx-quickstart on Sat Nov 11 18:09:02 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to panprob's documentation!
-===================================
+panprob
+=======
 
 `panprob` is a Python package for converting between different problem formats.
+Currently, `panprob` can read problems written in `Gradescope-flavored markdown
+<https://help.gradescope.com/article/gm5cmcz19k-instructor-assignment-online>`_
+and `DSCTeX LaTeX <https://eldridgejm.github.io/dsctex>`_, and can render problems in
+Gradescope-flavored markdown, DSCTeX, and HTML.
+
 See the source code on `GitHub <https://github.com/eldridgejm/panprob>`_.
 
 
@@ -42,6 +42,8 @@ The input and output formats will be inferred from the extensions.
 
    parsers.rst
    renderers.rst
+   postprocessors.rst
+   exceptions.rst
    ast.rst
 
 

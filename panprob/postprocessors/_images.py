@@ -1,6 +1,7 @@
-from .._types import Node, InternalNode, ImageFile
 import pathlib
 import shutil
+
+from ..ast import Node, InternalNode, ImageFile
 
 
 def copy_images(node: Node, src: pathlib.Path, dest: pathlib.Path) -> None:

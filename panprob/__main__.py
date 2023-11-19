@@ -35,7 +35,6 @@ def main():
 
     try:
         tree = parse(contents)
-        tree = ast.postprocessors.paragraphize(tree)
         out = render(tree)
     except exceptions.Error as exc:
         print("Error:", exc)

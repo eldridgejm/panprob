@@ -1,9 +1,9 @@
 """Renders a problem to HTML."""
 
-from textwrap import dedent
+from textwrap import dedent, indent
 from uuid import uuid4
 
-from .. import ast
+from .. import ast, exceptions
 
 # A problem is rendered from an AST to HTML by recursively rendering each node using
 # "node renderer". A node renderer is a function that takes 1) a node and 2) a callback
@@ -35,16 +35,6 @@ def _renderer(nodetype):
 
 @_renderer(ast.Problem)
 def _render_problem(node: ast.Problem, render_child):
-    html = dedent(
-        """
-        <div class="problem">
-            <div class="problem-body">
-                {contents}
-            </div>
-        </div>
-        """.strip()
-    )
-
     subprob_counter = 1
     rendered_children = []
     for child in node.children:
@@ -57,20 +47,35 @@ def _render_problem(node: ast.Problem, render_child):
             rendered_children.append(render_child(child))
 
     contents = "\n".join(rendered_children)
-    return html.format(contents=contents)
+    contents = indent(contents, "    " * 2)
+
+    return dedent(
+        """
+        <div class="problem">
+            <div class="problem-body">
+        {contents}
+            </div>
+        </div>
+        """.strip(
+            "\n"
+        )
+    ).format(contents=contents)
 
 
 def _render_subproblem(node: ast.Subproblem, counter: int, render_child):
-    html = dedent(
+    contents = "\n".join(render_child(child) for child in node.children)
+    contents = indent(contents, "    ")
+
+    return dedent(
         """
         <div class="subproblem">
             <h3 class="subproblem-id">Part {counter})</h3>
-            {contents}
+        {contents}
         </div>
-        """.strip()
-    )
-    contents = "\n".join(render_child(child) for child in node.children)
-    return html.format(counter=counter, contents=contents)
+        """.strip(
+            "\n"
+        )
+    ).format(counter=counter, contents=contents)
 
 
 # text ---------------------------------------------------------------------------------
@@ -136,7 +141,17 @@ def _render_truefalse(node: ast.TrueFalse, render_child):
 @_renderer(ast.Solution)
 def _render_solution(node: ast.Solution, render_child):
     contents = "\n".join(render_child(child) for child in node.children)
-    return f"<details><summary>Solution</summary>{contents}</details>"
+    contents = indent(contents, "    ")
+    return dedent(
+        """
+        <details>
+            <summary>Solution</summary>
+        {contents}
+        </details>
+        """.strip(
+            "\n"
+        )
+    ).format(contents=contents)
 
 
 def _render_choice(node: ast.Choice, kind: str, render_child):
@@ -199,10 +214,15 @@ def _render_imagefile(node: ast.ImageFile, render_child):
     )
 
 
+# render() =============================================================================
+
+
 def render(problem: ast.Problem, overrides=None) -> str:
     """Render a problem to HTML.
 
-    This render is capable of rendering all node types from :mod:`panprob.ast`.
+    This renderer is capable of rendering all node types from
+    :mod:`panprob.ast`, except for the special nodes :class:`panprob.ast.Blob`
+    and :class:`panprob.ast.ParBreak`, which should not appear in the AST.
 
     Parameters
     ----------
@@ -217,6 +237,12 @@ def render(problem: ast.Problem, overrides=None) -> str:
     -------
     str
         The problem rendered as an HTML string.
+
+    Raises
+    ------
+    RenderError
+        If there is an issue rendering this tree, such as when an unkown AST
+        node type is encountered.
 
     Notes
     -----
@@ -235,6 +261,6 @@ def render(problem: ast.Problem, overrides=None) -> str:
         if type(node) in renderers:
             return renderers[type(node)](node, _render_node)
         else:
-            raise NotImplementedError(f"no HTML renderer for {type(node)}")
+            raise exceptions.RenderError(f"no HTML renderer for {type(node)}")
 
     return _render_node(problem)

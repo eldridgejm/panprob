@@ -1,44 +1,16 @@
-"""Tests for ast.postprocessors.paragraphize."""
+"""Tests for postprocessors.paragraphize."""
 
 from panprob import ast
-from panprob.ast.postprocessors import paragraphize
-
-
-def test_wraps_isolated_text_nodes_into_paragraphs():
-    tree = ast.Problem(children=[ast.Text("This is text.")])
-
-    result = paragraphize(tree)
-
-    assert result == ast.Problem(
-        children=[ast.Paragraph(children=[ast.Text("This is text.")])]
-    )
-
-
-def test_splits_text_nodes_at_newlines():
-    tree = ast.Problem(
-        children=[
-            ast.Text("One\n\nTwo\n\nThree"),
-        ]
-    )
-
-    result = paragraphize(tree)
-
-    assert result == ast.Problem(
-        children=[
-            ast.Paragraph(children=[ast.Text("One")]),
-            ast.Paragraph(children=[ast.Text("Two")]),
-            ast.Paragraph(children=[ast.Text("Three")]),
-        ]
-    )
+from panprob.postprocessors import paragraphize
 
 
 def test_preserves_text_styling():
     tree = ast.Problem(
         children=[
-            ast.Text("This is "),
-            ast.Text("bold", bold=True),
-            ast.Text(" and "),
-            ast.Text("italic", italic=True),
+            ast.Blob(children=[ast.Text("This is ")]),
+            ast.Blob(children=[ast.Text("bold", bold=True)]),
+            ast.Blob(children=[ast.Text(" and ")]),
+            ast.Blob(children=[ast.Text("italic", italic=True)]),
         ]
     )
 

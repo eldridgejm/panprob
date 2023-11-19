@@ -1,6 +1,8 @@
-from .._types import Node, InternalNode, CodeFile, Code
 import copy
 import pathlib
+
+from ..ast import Node, InternalNode, CodeFile, Code
+
 
 def subsume_code(node: Node, root: pathlib.Path) -> Node:
     """Replaces all :class:`CodeFile` nodes in the AST with :class:`Code` nodes

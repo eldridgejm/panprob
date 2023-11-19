@@ -1,7 +1,9 @@
 from panprob.renderers.dsctex import render
-from panprob import ast
+from panprob import ast, exceptions
 
 from textwrap import dedent
+
+from pytest import raises
 
 
 def print_ast(node, indent=0):
@@ -19,16 +21,25 @@ def print_ast(node, indent=0):
 def test_on_simple_problem():
     tree = ast.Problem(
         children=[
-            ast.Text("This is a simple problem."),
+            ast.Paragraph(
+                children=[
+                    ast.Text("This is a simple problem."),
+                ]
+            )
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
+
             This is a simple problem.
+
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -43,14 +54,17 @@ def test_paragraph():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is a paragraph.
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -67,14 +81,17 @@ def test_bold_text():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is some \textbf{bold text}.
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -91,14 +108,17 @@ def test_italic_text():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is some \textit{italic text}.
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -114,14 +134,17 @@ def test_inline_code():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is some code: \mintinline{python}{print('Hello, world!')}
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -140,8 +163,10 @@ def test_code_block():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             \begin{minted}{python}
@@ -153,6 +178,7 @@ def test_code_block():
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -168,14 +194,17 @@ def test_inline_math():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is some math: $x^2 + y^2 = z^2$
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -191,8 +220,10 @@ def test_display_math():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is some math:
@@ -203,20 +234,24 @@ def test_display_math():
 
         \end{prob}
         """
+        ).strip()
     )
 
 
 def test_true_false():
     tree = ast.Problem(children=[ast.TrueFalse(True)])
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             \Tf{}
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -235,8 +270,10 @@ def test_solution():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             \begin{soln}
@@ -247,6 +284,7 @@ def test_solution():
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -255,32 +293,50 @@ def test_multiple_choice():
         children=[
             ast.MultipleChoice(
                 children=[
-                    ast.Choice(correct=False, children=[ast.Text("One")]),
-                    ast.Choice(correct=False, children=[ast.Text("Two")]),
-                    ast.Choice(correct=True, children=[ast.Text("Three")]),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("One")])],
+                    ),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("Two")])],
+                    ),
+                    ast.Choice(
+                        correct=True,
+                        children=[ast.Paragraph(children=[ast.Text("Three")])],
+                    ),
                 ]
             )
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             \begin{choices}
                 \choice {
+
                     One
+
                 }
                 \choice {
+
                     Two
+
                 }
                 \correctchoice {
+
                     Three
+
                 }
             \end{choices}
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -289,32 +345,50 @@ def test_multiple_select():
         children=[
             ast.MultipleSelect(
                 children=[
-                    ast.Choice(correct=False, children=[ast.Text("One")]),
-                    ast.Choice(correct=False, children=[ast.Text("Two")]),
-                    ast.Choice(correct=True, children=[ast.Text("Three")]),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("One")])],
+                    ),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("Two")])],
+                    ),
+                    ast.Choice(
+                        correct=True,
+                        children=[ast.Paragraph(children=[ast.Text("Three")])],
+                    ),
                 ]
             )
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             \begin{choices}[rectangle]
                 \choice {
+
                     One
+
                 }
                 \choice {
+
                     Two
+
                 }
                 \correctchoice {
+
                     Three
+
                 }
             \end{choices}
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -334,14 +408,17 @@ def test_inline_response_box():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             This is a response box: \inlineresponsebox{Solution}
 
         \end{prob}
         """
+        ).strip()
     )
 
 
@@ -352,12 +429,45 @@ def test_image():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         \begin{prob}
 
             \includegraphics{./image.png}
 
         \end{prob}
         """
+        ).strip()
     )
+
+
+def test_wraps_lines_to_80_chars_in_paragraphs():
+    long_line = "This is a very long line that should be wrapped to 80 characters. " * 2
+
+    tree = ast.Problem(children=[ast.Paragraph(children=[ast.Text(long_line)])])
+
+    assert (
+        render(tree)
+        == dedent(
+            r"""
+        \begin{prob}
+
+            This is a very long line that should be wrapped to 80 characters. This is a very
+            long line that should be wrapped to 80 characters.
+
+        \end{prob}
+        """
+        ).strip()
+    )
+
+
+# error handling =======================================================================
+
+
+def test_raises_if_ast_contains_blob():
+    tree = ast.Problem(children=[ast.Blob(children=[ast.Text("Hello, world!")])])
+
+    with raises(exceptions.RenderError):
+        render(tree)

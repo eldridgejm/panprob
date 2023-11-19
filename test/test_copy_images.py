@@ -1,6 +1,6 @@
 import pathlib
 
-from panprob.ast.postprocessors import copy_images
+from panprob.postprocessors import copy_images
 from panprob import ast
 
 
@@ -20,9 +20,17 @@ def test_copy_images(tmpdir):
 
     tree = ast.Problem(
         children=[
-            ast.Text("This is an image:"),
+            ast.Paragraph(
+                children=[
+                    ast.Text("This is an image:"),
+                ]
+            ),
             ast.ImageFile("image_1.png"),
-            ast.Text("This is another image:"),
+            ast.Paragraph(
+                children=[
+                    ast.Text("This is another image:"),
+                ]
+            ),
             ast.ImageFile("foo/image_2.png"),
         ]
     )

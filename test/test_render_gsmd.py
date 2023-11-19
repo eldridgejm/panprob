@@ -1,5 +1,5 @@
 from panprob.renderers.gsmd import render
-from panprob import ast
+from panprob import ast, exceptions
 
 from textwrap import dedent
 
@@ -21,7 +21,11 @@ def print_ast(node, indent=0):
 def test_text():
     tree = ast.Problem(
         children=[
-            ast.Text("This is a simple problem."),
+            ast.Paragraph(
+                children=[
+                    ast.Text("This is a simple problem."),
+                ]
+            )
         ]
     )
 
@@ -39,10 +43,13 @@ def test_paragraph():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is a paragraph.
         """
+        ).strip()
     )
 
 
@@ -59,10 +66,13 @@ def test_bold_text():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is some **bold text**.
         """
+        ).strip()
     )
 
 
@@ -79,10 +89,13 @@ def test_italic_text():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is some *italic text*.
         """
+        ).strip()
     )
 
 
@@ -98,10 +111,13 @@ def test_inline_code():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is some code: `print('Hello, world!')`
         """
+        ).strip()
     )
 
 
@@ -120,8 +136,10 @@ def test_code_block():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         ```python
 
         def main():
@@ -129,6 +147,7 @@ def test_code_block():
 
         ```
         """
+        ).strip()
     )
 
 
@@ -144,10 +163,13 @@ def test_inline_math():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is some math: $$x^2 + y^2 = z^2$$
         """
+        ).strip()
     )
 
 
@@ -163,24 +185,30 @@ def test_display_math():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is some math:
 
         $$x^2 + y^2 = z^2$$
 
         """
+        ).strip()
     )
 
 
 def test_true_false():
     tree = ast.Problem(children=[ast.TrueFalse(True)])
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         (x) True
         ( ) False
         """
+        ).strip()
     )
 
 
@@ -199,12 +227,15 @@ def test_solution():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
 
         [[This is a solution.]]
 
         """
+        ).strip()
     )
 
 
@@ -228,13 +259,16 @@ def test_multiline_solution():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
 
         [[This is a solution.]]
         [[This is another paragraph.]]
 
         """
+        ).strip()
     )
 
 
@@ -243,40 +277,35 @@ def test_multiple_choice():
         children=[
             ast.MultipleChoice(
                 children=[
-                    ast.Choice(correct=False, children=[ast.Text("One")]),
-                    ast.Choice(correct=False, children=[ast.Text("Two")]),
-                    ast.Choice(correct=True, children=[ast.Text("Three")]),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("One")])],
+                    ),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("Two")])],
+                    ),
+                    ast.Choice(
+                        correct=True,
+                        children=[ast.Paragraph(children=[ast.Text("Three")])],
+                    ),
                 ]
             )
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
 
         ( ) One
         ( ) Two
         (x) Three
 
         """
+        ).strip()
     )
-
-
-def test_trying_to_render_a_choice_with_multiple_lines_raises_an_error():
-    tree = ast.Problem(
-        children=[
-            ast.MultipleChoice(
-                children=[
-                    ast.Choice(correct=False, children=[ast.Text("One\n\nTwo")]),
-                    ast.Choice(correct=False, children=[ast.Text("Two")]),
-                    ast.Choice(correct=True, children=[ast.Text("Three")]),
-                ]
-            )
-        ]
-    )
-
-    with raises(ValueError):
-        render(tree)
 
 
 def test_multiple_select():
@@ -284,22 +313,34 @@ def test_multiple_select():
         children=[
             ast.MultipleSelect(
                 children=[
-                    ast.Choice(correct=False, children=[ast.Text("One")]),
-                    ast.Choice(correct=False, children=[ast.Text("Two")]),
-                    ast.Choice(correct=True, children=[ast.Text("Three")]),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("One")])],
+                    ),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("Two")])],
+                    ),
+                    ast.Choice(
+                        correct=True,
+                        children=[ast.Paragraph(children=[ast.Text("Three")])],
+                    ),
                 ]
             )
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
 
         [ ] One
         [ ] Two
         [x] Three
 
         """
+        ).strip()
     )
 
 
@@ -319,12 +360,15 @@ def test_inline_response_box():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         This is a response box:
 
         [____](Solution)
         """
+        ).strip()
     )
 
 
@@ -335,8 +379,65 @@ def test_image():
         ]
     )
 
-    assert render(tree) == dedent(
-        r"""
+    assert (
+        render(tree)
+        == dedent(
+            r"""
         ![](./image.png)
         """
+        ).strip()
     )
+
+
+# error handling =======================================================================
+
+
+def test_trying_to_render_a_choice_with_multiple_lines_raises_an_error():
+    tree = ast.Problem(
+        children=[
+            ast.MultipleChoice(
+                children=[
+                    ast.Choice(
+                        correct=False,
+                        children=[
+                            ast.Paragraph(children=[ast.Text("One A")]),
+                            ast.Paragraph(children=[ast.Text("One B")]),
+                        ],
+                    ),
+                    ast.Choice(
+                        correct=False,
+                        children=[ast.Paragraph(children=[ast.Text("Two")])],
+                    ),
+                    ast.Choice(
+                        correct=True,
+                        children=[ast.Paragraph(children=[ast.Text("Three")])],
+                    ),
+                ]
+            )
+        ]
+    )
+
+    with raises(exceptions.RenderError):
+        render(tree)
+
+
+def test_raises_if_ast_contains_blob():
+    tree = ast.Problem(
+        children=[
+            ast.Blob(children=[ast.Text("This is a blob.")]),
+        ]
+    )
+
+    with raises(exceptions.RenderError):
+        render(tree)
+
+
+def test_raises_if_ast_contains_code_file():
+    tree = ast.Problem(
+        children=[
+            ast.CodeFile("python", "code.py"),
+        ]
+    )
+
+    with raises(exceptions.RenderError):
+        render(tree)

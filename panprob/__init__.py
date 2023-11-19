@@ -1,4 +1,4 @@
-from . import ast, parsers, renderers, exceptions
+from . import ast, parsers, renderers, postprocessors, exceptions
 
 
 _PARSERS = {
@@ -29,9 +29,6 @@ def convert(source: str, parser: str, renderer: str) -> str:
     -------
     str
         The converted string.
-
-    For more control over the parsers and renderers, see the corresponding
-    parts of the documentation.
 
     Example
     -------
@@ -84,5 +81,4 @@ def convert(source: str, parser: str, renderer: str) -> str:
         )
 
     tree = _PARSERS[parser](source)
-    tree = ast.postprocessors.paragraphize(tree)
     return _RENDERERS[renderer](tree)

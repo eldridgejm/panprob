@@ -1,7 +1,9 @@
 from abc import ABC
 import typing
+import re
+from textwrap import dedent, indent
 
-from ..exceptions import IllegalChild
+from ..exceptions import IllegalChild, Error
 
 # abstract base classes ================================================================
 
@@ -22,18 +24,16 @@ class Node(ABC):
         def is_public_attribute(k, v):
             return not k.startswith("_") and not callable(v)
 
-        return {k: v for k, v in self.__dict__.items() if is_public_attribute(k, v)}
+        attrs = {k: v for k, v in self.__dict__.items() if is_public_attribute(k, v)}
+
+        return attrs
 
     def __eq__(self, other):
-        """Determine if this node is equal to the other."""
-        if not isinstance(other, type(self)):
-            return False
+        raise NotImplementedError
 
-        return self._attrs == other._attrs
-
-    def __repr__(self):
-        """Human-readable representation of this node."""
-        return f"{type(self).__name__}({self.__dict__!r})"
+    def prettify(self) -> str:
+        """Return a pretty-printed string representation of the node."""
+        raise NotImplementedError
 
 
 class InternalNode(Node):
@@ -41,8 +41,6 @@ class InternalNode(Node):
 
     Attributes
     ----------
-    children : tuple of Node
-        The children of this node.
     allowed_child_types : tuple of type
         The types of nodes that this node can contain.
 
@@ -62,25 +60,83 @@ class InternalNode(Node):
             raise IllegalChild(self, child)
         return child
 
-    def add_child(self, node: Node):
-        """Add a child node, checking to see if it's a valid type.
+    @property
+    def children(self) -> typing.Tuple[Node]:
+        """The children of this node.
 
-        Parameters
-        ----------
-        node : Node
-            The node to add.
+        This attribute can be set in the usual way:
 
-        Raises
-        ------
-        IllegalChild
-            If the child is not a valid type for this parent.
+        .. code-block:: python
+
+            node.children = (child1, child2, ...)
+
+        When it is set, each child is checked to ensure that it is a valid type for this
+        node. If it is not, an :class:`panprob.exceptions.IllegalChild`
+        exception is raised.
 
         """
-        self.children = (*self.children, self._check_child_type(node))
+        return self._children
+
+    @children.setter
+    def children(self, children: typing.Sequence[Node]):
+        """Set the children of this node.
+
+        Performs error checking to ensure that each child is a valid type for this node.
+
+        """
+        self._children = tuple(self._check_child_type(child) for child in children)
+
+    def __eq__(self, other) -> bool:
+        """Determine if this node is equal to the other."""
+        if not isinstance(self, type(other)):
+            return False
+
+        return self._attrs == other._attrs and self.children == other.children
+
+    def __repr__(self):
+        """Human-readable representation of this node."""
+        return f"{type(self).__name__}(children={self.children!r})"
+
+    def prettify(self) -> str:
+        """Return a pretty string representation of the node."""
+        children = ", \n".join(child.prettify() for child in self.children)
+        children = indent(children, "    " * 2)
+        typename = type(self).__name__
+        return (
+            dedent(
+                """
+            {typename}(children=[
+            {children}
+                ]
+            )
+            """.strip(
+                    "\n"
+                )
+            )
+            .format(children=children, typename=typename)
+            .strip()
+        )
 
 
 class LeafNode(Node):
     """ABC for a leaf node in the AST."""
+
+    def __repr__(self):
+        """Human-readable representation of this node."""
+        kwargs = ", ".join(f"{k}={v!r}" for k, v in self._attrs.items())
+        return f"{type(self).__name__}({kwargs})"
+
+    def __eq__(self, other):
+        """Determine if this node is equal to the other."""
+        if not isinstance(self, type(other)):
+            return False
+
+        return self._attrs == other._attrs
+
+    def prettify(self):
+        """Return a pretty string representation of the node."""
+        kwargs = ", ".join(f"{k}={v!r}" for k, v in self._attrs.items())
+        return f"{type(self).__name__}({kwargs})"
 
 
 # AST node types =======================================================================
@@ -93,18 +149,16 @@ class Problem(InternalNode):
 
     Can contain the following node types:
 
-    - Subproblem
-    - Code
-    - DisplayMath
-    - ImageFile
-    - MultipleChoice
-    - MultipleSelect
-    - TrueFalse
-    - Solution
-    - Text
-    - InlineMath
-    - InlineCode
-    - Paragraph
+    - :class:`Subproblem`
+    - :class:`Paragraph`
+    - :class:`Blob`
+    - :class:`DisplayMath`
+    - :class:`Code`
+    - :class:`ImageFile`
+    - :class:`Solution`
+    - :class:`MultipleChoice`
+    - :class:`MultipleSelect`
+    - :class:`TrueFalse`
 
     """
 
@@ -126,18 +180,116 @@ class Paragraph(InternalNode):
 
     Can contain the following node types:
 
-    - Text
-    - InlineMath
-    - InlineCode
-    - InlineResponseBox
+    - :class:`Blob`
+    - :class:`Text`
+    - :class:`InlineMath`
+    - :class:`InlineCode`
+    - :class:`InlineResponseBox`
+
+    It can be difficult for the parser to know where a paragraph should be
+    created during parse time. Rather, it is often easier to infer this *post
+    hoc*, after the full AST has been built. This can be done by placing text into
+    :class:`Blob` nodes at parse time, and then converting them into
+    :class:`Paragraph` nodes with the :func:`panprob.postprocessors.paragraphize`
+    function; see their documentation for more details.
+
+    """
+
+
+class Blob(InternalNode):
+    r"""
+    A special node type that is used to hold inline content that should be
+    placed into a :class:`Paragraph` after the AST has been built. Parsers
+    should remove all :class:`Blob` nodes from the AST after parsing and before
+    returning the AST to the caller. Renderers should not expect to encounter
+    any :class:`Blob` nodes in the AST.
+
+    :class:`Text` and inline content, such as :class:`InlineMath`,
+    :class:`InlineCode`, and :class:`InlineResponseBox`, cannot appear directly
+    under, e.g., a :class:`Problem` in an AST; they must instead be contained
+    within a :class:`Paragraph`. However, it can be difficult for the parser to
+    know where a paragraph should be created during parse time. Rather, it is
+    often easier to infer this *post hoc*, after the full AST has been built.
+
+    The :class:`Blob` special node type exists to enable such a *post hoc*
+    approach to creating paragraphs. Instead of placing text directly into a
+    :class:`Paragraph` during parsing, the parser puts one or more pieces of
+    text into a :class:`Blob`. Then, after the AST has been created, a
+    post-processing step is run that converts all :class:`Blob` nodes into
+    :class:`Paragraph` nodes by merging or splitting them as necessary. This
+    post-processing step is implemented in the
+    :func:`panprob.postprocessors.paragraphize` function.
+
+    A :class:`Blob` node can have one or more children. If it has more than one
+    child, it is implicit that there is a paragraph break between each child.
+    If there is only one child, it may be merged into a paragraph with text
+    that comes before or after in the AST.
+
+    A :class:`Blob` can contain the following node types:
+
+    - :class:`Text`
+    - :class:`InlineMath`
+    - :class:`InlineCode`
+    - :class:`InlineResponseBox`
+    - :class:`ParBreak`
+
+    Example
+    -------
+
+    For an example of where one might use a :class:`Blob`, consider the LaTeX
+    string:
+
+    .. code:: latex
+
+        This is a \textbf{single} paragraph.
+
+        And this is another.
+
+    A LaTeX parser may parse this in three pieces: 1) a string containing the
+    text :code:`"This is a "`, 2) an inline node containing the
+    :code:`\\textbf{single}` command, and 3) a string containing the rest:
+    :code:`"paragraph\\n\\nAnd this is another."`. In the final AST, we want these three pieces
+    to be in *two* paragraphs: the first containing three :class:`Text`
+    nodes for :code:`"This is a"`, :code:`"single"` (in bold), and :code:`"paragraph."`,
+    and the second paragraph consisting of a single :class:`Text` node for
+    :code:`"And this is another."`.
+
+    Instead of inferring these two paragraphs during parsing, the parser
+    instead might create three :class:`Blob` nodes: one for each piece of text
+    produced by the parser. During postprocessing, the blobs will be "exploded"
+    into their consituents which are then re-formed into paragraphs as necessary.
+
+    When placing text into a :class:`Blob`, the parser should break the text
+    into pieces at paragraph breaks. In this example, the first blob will
+    contain a single child node: a :class:`Text` node containing the text
+    :code:`"This is a "`. The second blob will contain a single child node: a
+    :class:`Text` node containing the text :code:`"single"` (in bold). The
+    third blob will contain two child nodes: a :class:`Text` node containing
+    the text :code:`"paragraph."` and a :class:`Text` node containing the text
+    :code:`"And this is another."`.
+
+    """
+
+
+class ParBreak(LeafNode):
+    """A paragraph break.
+
+    This special node is meant to only be used in :class:`Blob` nodes. It
+    is not meant to be used in the final AST that is returned to the caller.
 
     """
 
 
 class Text(LeafNode):
-    """Text, optionally bold, and/or italic.
+    """Text, optionally bold and/or italic.
 
-    A leaf node.
+    Upon passing the text to the constructor, all newlines are replaced with
+    spaces. All repeated whitespace is replaced with a single space.
+
+    The text cannot be empty, and it cannot only be whitespace. If either of
+    these conditions are violated, an :class:`Error` will be raised.
+
+    A :class:`Text` node is a leaf node.
 
     Attributes
     ----------
@@ -152,6 +304,17 @@ class Text(LeafNode):
 
     def __init__(self, text, bold=False, italic=False):
         super().__init__()
+
+        if not text:
+            raise Error("Text cannot be empty.")
+
+        # replace all repeated whitespace with a single space.
+        # this also has the effect of replacing all newlines with spaces.
+        text = re.sub(r"\s+", " ", text)
+
+        if not text.strip():
+            raise Error("Text cannot contain only whitespace.")
+
         self.text = text
         self.bold = bold
         self.italic = italic
@@ -283,7 +446,7 @@ class ImageFile(LeafNode):
 class MultipleChoice(InternalNode):
     """A multiple choice area.
 
-    Can contain Choice nodes.
+    Can contain :class:`Choice` nodes.
 
     """
 
@@ -291,7 +454,7 @@ class MultipleChoice(InternalNode):
 class MultipleSelect(InternalNode):
     """A select-all-that-apply area in a question.
 
-    Can contain Choice nodes.
+    Can contain :class:`Choice` nodes.
 
     """
 
@@ -301,14 +464,12 @@ class Choice(InternalNode):
 
     Can contain the following node types:
 
-    - Text
-    - InlineMath
-    - DisplayMath
-    - Code
-    - InlineCode
-    - CodeFile
-    - ImageFile
-    - Paragraph
+    - :class:`Paragraph`
+    - :class:`Blob`
+    - :class:`ImageFile`
+    - :class:`Code`
+    - :class:`CodeFile`
+    - :class:`DisplayMath`
 
     Attributes
     ----------
@@ -344,9 +505,9 @@ class InlineResponseBox(InternalNode):
 
     Can contain the following node types:
 
-    - Text
-    - InlineMath
-    - InlineCode
+    - :class:`Text`
+    - :class:`InlineMath`
+    - :class:`InlineCode`
 
     """
 
@@ -356,6 +517,13 @@ class Solution(InternalNode):
 
     Can contain all of the same types as a :class:`Solution` node.
 
+    - :class:`Blob`
+    - :class:`Paragraph`
+    - :class:`Code`
+    - :class:`CodeFile`
+    - :class:`DisplayMath`
+    - :class:`ImageFile`
+
     """
 
 
@@ -363,6 +531,8 @@ class Solution(InternalNode):
 
 Problem.allowed_child_types = (
     Subproblem,
+    Blob,
+    Paragraph,
     Code,
     CodeFile,
     DisplayMath,
@@ -372,18 +542,9 @@ Problem.allowed_child_types = (
     TrueFalse,
     InlineResponseBox,
     Solution,
-    Text,
-    InlineMath,
-    InlineCode,
-    Paragraph,
 )
 
-Paragraph.allowed_child_types = (
-    Text,
-    InlineMath,
-    InlineCode,
-    InlineResponseBox,
-)
+Paragraph.allowed_child_types = (Text, InlineMath, InlineCode, InlineResponseBox, Blob)
 
 # do not allow subproblems to contain subproblems
 Subproblem.allowed_child_types = Problem.allowed_child_types[1:]
@@ -393,16 +554,23 @@ MultipleChoice.allowed_child_types = (Choice,)
 MultipleSelect.allowed_child_types = (Choice,)
 
 Choice.allowed_child_types = (
-    Text,
-    InlineMath,
-    DisplayMath,
-    Code,
-    InlineCode,
-    CodeFile,
-    ImageFile,
+    Blob,
     Paragraph,
+    ImageFile,
+    Code,
+    CodeFile,
+    DisplayMath,
 )
 
-Solution.allowed_child_types = Choice.allowed_child_types
+Solution.allowed_child_types = (
+    Blob,
+    Paragraph,
+    Code,
+    CodeFile,
+    DisplayMath,
+    ImageFile,
+)
 
 InlineResponseBox.allowed_child_types = (Text, InlineMath, InlineCode)
+
+Blob.allowed_child_types = (Text, InlineMath, InlineCode, InlineResponseBox, ParBreak)

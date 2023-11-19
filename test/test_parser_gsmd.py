@@ -1,16 +1,23 @@
 from textwrap import dedent, indent
 
 from panprob.parsers.gsmd import parse
-from panprob import ast
+from panprob import ast, exceptions
 
 from pytest import raises
 
 
-def print_ast(node, indent=0):
-    print("  " * indent + type(node).__name__)
-    if hasattr(node, "children"):
-        for child in node.children:
-            print_ast(child, indent + 1)
+def test_empty_problem():
+    md = dedent(
+        """
+
+
+
+        """
+    )
+
+    expected = ast.Problem(children=[])
+
+    assert parse(md) == expected
 
 
 def test_simple_problem():
@@ -22,7 +29,6 @@ def test_simple_problem():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(children=[ast.Text("This is the problem.")]),
         ]
     )
@@ -39,7 +45,6 @@ def test_bold_text():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is the "),
@@ -62,7 +67,6 @@ def test_italic_text():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is the "),
@@ -85,7 +89,6 @@ def test_inline_code():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is the "),
@@ -112,13 +115,11 @@ def test_fenced_code_block():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is the code:"),
                 ]
             ),
-            ast.Text("\n"),
             ast.Code("lua", "local x = 42\n"),
         ]
     )
@@ -135,25 +136,11 @@ def test_image():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.ImageFile("images/foo.png"),
-            ast.Text("\n"),
         ]
     )
 
     assert parse(md) == expected
-
-
-def test_inline_image_raises_error():
-    """We don't support inline images in PanProb."""
-    md = dedent(
-        """
-        This is an inline image: ![alt text](images/foo.png)
-        """
-    )
-
-    with raises(ValueError):
-        parse(md)
 
 
 def test_inline_math():
@@ -165,7 +152,6 @@ def test_inline_math():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is math: "),
@@ -190,13 +176,11 @@ def test_solution():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is a solution:"),
                 ]
             ),
-            ast.Text("\n"),
             ast.Solution(
                 children=[
                     ast.Paragraph(
@@ -206,7 +190,6 @@ def test_solution():
                     )
                 ]
             ),
-            ast.Text("\n"),
         ]
     )
 
@@ -224,13 +207,11 @@ def test_solution_contents_are_parsed():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.Paragraph(
                 children=[
                     ast.Text("This is a solution:"),
                 ]
             ),
-            ast.Text("\n"),
             ast.Solution(
                 children=[
                     ast.Paragraph(
@@ -241,7 +222,6 @@ def test_solution_contents_are_parsed():
                     )
                 ]
             ),
-            ast.Text("\n"),
         ]
     )
 
@@ -259,23 +239,77 @@ def test_multiple_choices():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.MultipleChoice(
                 children=[
                     ast.Choice(
                         children=[
-                            ast.Text("foo"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("foo"),
+                                ]
+                            )
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text("bar"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("bar"),
+                                ]
+                            )
                         ],
                         correct=True,
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text("baz"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("baz"),
+                                ]
+                            )
+                        ]
+                    ),
+                ]
+            ),
+        ]
+    )
+
+    assert parse(md) == expected
+
+
+def test_multiple_choices_without_choice_content():
+    md = dedent(
+        """
+        ( ) foo
+        (x)
+        ( ) baz
+        """
+    )
+
+    expected = ast.Problem(
+        children=[
+            ast.MultipleChoice(
+                children=[
+                    ast.Choice(
+                        children=[
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("foo"),
+                                ]
+                            )
+                        ]
+                    ),
+                    ast.Choice(
+                        children=[],
+                        correct=True,
+                    ),
+                    ast.Choice(
+                        children=[
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("baz"),
+                                ]
+                            )
                         ]
                     ),
                 ]
@@ -297,24 +331,35 @@ def test_multiple_choices_parses_recursively():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.MultipleChoice(
                 children=[
                     ast.Choice(
                         children=[
-                            ast.Text("foo "),
-                            ast.InlineMath("x = 42"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("foo "),
+                                    ast.InlineMath("x = 42"),
+                                ]
+                            )
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text("bar"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("bar"),
+                                ]
+                            )
                         ],
                         correct=True,
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text("baz"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("baz"),
+                                ]
+                            )
                         ]
                     ),
                 ]
@@ -336,23 +381,34 @@ def test_multiple_select():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
             ast.MultipleSelect(
                 children=[
                     ast.Choice(
                         children=[
-                            ast.Text("foo"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("foo"),
+                                ]
+                            )
                         ]
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text("bar"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("bar"),
+                                ]
+                            )
                         ],
                         correct=True,
                     ),
                     ast.Choice(
                         children=[
-                            ast.Text("baz"),
+                            ast.Paragraph(
+                                children=[
+                                    ast.Text("baz"),
+                                ]
+                            )
                         ]
                     ),
                 ]
@@ -372,14 +428,52 @@ def test_inline_response_box():
 
     expected = ast.Problem(
         children=[
-            ast.Text("\n"),
-            ast.InlineResponseBox(
+            ast.Paragraph(
                 children=[
-                    ast.InlineMath("f(x) = 42"),
+                    ast.InlineResponseBox(
+                        children=[
+                            ast.InlineMath("f(x) = 42"),
+                        ]
+                    ),
                 ]
-            ),
-            ast.Text("\n"),
+            )
         ]
     )
 
     assert parse(md) == expected
+
+
+# error handling =======================================================================
+
+
+def test_inline_response_box_without_answer_raises():
+    md = dedent(
+        """
+        [____]()
+        """
+    )
+
+    expected = ast.Problem(
+        children=[
+            ast.Paragraph(
+                children=[
+                    ast.InlineResponseBox(children=[]),
+                ]
+            )
+        ]
+    )
+
+    with raises(exceptions.ParseError):
+        parse(md)
+
+
+def test_inline_image_raises_error():
+    """We don't support inline images in PanProb."""
+    md = dedent(
+        """
+        This is an inline image: ![alt text](images/foo.png)
+        """
+    )
+
+    with raises(exceptions.ParseError):
+        parse(md)
