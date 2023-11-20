@@ -20,8 +20,7 @@ Copy Images
 A common use case for `panprob` is to convert all of the problems in one
 directory, placing the output in another directory. If the problems contain
 images, then the images will need to be copied to the output directory as well.
-This can be done with the following function (which doesn't actually modify the
-AST):
+This can be done with the following function:
 
 .. autofunction:: panprob.postprocessors.copy_images
 

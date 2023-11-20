@@ -128,12 +128,11 @@ original node.</p>
 <p>A common use case for <cite>panprob</cite> is to convert all of the problems in one
 directory, placing the output in another directory. If the problems contain
 images, then the images will need to be copied to the output directory as well.
-This can be done with the following function (which doesn’t actually modify the
-AST):</p>
+This can be done with the following function:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="panprob.postprocessors.copy_images">
-<span class="sig-prename descclassname"><span class="pre">panprob.postprocessors.</span></span><span class="sig-name descname"><span class="pre">copy_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#panprob.postprocessors.copy_images" title="Link to this definition"></a></dt>
-<dd><p>Copy the images referenced by ImageFile nodes to the destination directory.</p>
+<span class="sig-prename descclassname"><span class="pre">panprob.postprocessors.</span></span><span class="sig-name descname"><span class="pre">copy_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">node:</span> <span class="pre">~panprob.ast._types.Node,</span> <span class="pre">src:</span> <span class="pre">~pathlib.Path,</span> <span class="pre">dest:</span> <span class="pre">~pathlib.Path,</span> <span class="pre">transform_path:</span> <span class="pre">~typing.Callable[[str],</span> <span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="ast.html#panprob.ast.Node" title="panprob.ast._types.Node"><span class="pre">Node</span></a></span></span><a class="headerlink" href="#panprob.postprocessors.copy_images" title="Link to this definition"></a></dt>
+<dd><p>Copy the images referenced by <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageFile</span></code> nodes to the destination directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -142,6 +141,10 @@ AST):</p>
 the AST are relative to this.</p></li>
 <li><p><strong>dest</strong> (<em>pathlib.Path</em>) – The path to the directory where the files should be copied to. All
 necessary directories will be created.</p></li>
+<li><p><strong>transform_path</strong> (<em>Callable</em><em>[</em><em>[</em><em>str</em><em>]</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A function that, when called on the image’s original relative path,
+returns a new relative path that will be used as the images new path,
+relative to the output directory. The AST will be updated to reflect
+this change. The default is the identity function.</p></li>
 </ul>
 </dd>
 </dl>
