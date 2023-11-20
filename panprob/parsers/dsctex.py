@@ -505,7 +505,10 @@ def parse(
 
     # the first step is to parse the source text into a LaTeX AST of Command,
     # Environment, and str nodes:
-    latex_ast = _parse_source_into_latex_ast(latex)
+    try:
+        latex_ast = _parse_source_into_latex_ast(latex)
+    except Exception as exc:
+        raise ParseError(f"Could not parse LaTeX source. {exc}")
 
     # the only child of the root should be a problem environment
     try:

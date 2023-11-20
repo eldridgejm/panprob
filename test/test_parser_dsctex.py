@@ -700,6 +700,17 @@ def test_extending_with_new_converter():
 # error handling =======================================================================
 
 
+def test_raises_when_latex_is_malformed():
+    latex = r"""
+    \begin{prob}
+        \textbf{Testing
+    \end{prob}
+    """
+
+    with raises(exceptions.ParseError):
+        parse(latex)
+
+
 def test_raises_when_an_unknown_command_is_used():
     latex = r"""
     \begin{prob}
