@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Postprocessors &mdash; panprob 0.1.1 documentation</title>
+  <title>Postprocessors &mdash; panprob 0.1.2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
+        <script src="_static/documentation_options.js?v=92734c54"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -140,11 +140,15 @@ This can be done with the following function:</p>
 <li><p><strong>src</strong> (<em>pathlib.Path</em>) – The directory containing the images to be copied. All relative paths in
 the AST are relative to this.</p></li>
 <li><p><strong>dest</strong> (<em>pathlib.Path</em>) – The path to the directory where the files should be copied to. All
-necessary directories will be created.</p></li>
+necessary directories will be created. For example, if an image has
+relative path ‘images/bar.png’ and <cite>dest</cite> is ‘out/media’, then the
+image will be copied to ‘out/media/images/bar.png’.</p></li>
 <li><p><strong>transform_path</strong> (<em>Callable</em><em>[</em><em>[</em><em>str</em><em>]</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A function that, when called on the image’s original relative path,
-returns a new relative path that will be used as the images new path,
-relative to the output directory. The AST will be updated to reflect
-this change. The default is the identity function.</p></li>
+returns a new relative path that will be used as the image’s new
+relative path in the AST. This is useful for changing the image’s
+location. Note that this has no effect on where the image is actually
+placed; that is determined by the <cite>dest</cite> parameter alone. The default
+is the identity function.</p></li>
 </ul>
 </dd>
 </dl>
