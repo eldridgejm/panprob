@@ -4,7 +4,7 @@ from panprob.postprocessors import subsume_code
 
 def test_subsume_code_reads_code_into_ast(tmpdir):
     with (tmpdir / "testing.py").open("w") as fileob:
-        fileob.write("print('hello world')\n")
+        fileob.write("def foo():\n    print('hello world')\n")
 
     tree = ast.Problem(
         children=[
@@ -18,6 +18,6 @@ def test_subsume_code_reads_code_into_ast(tmpdir):
     assert resulting_tree == ast.Problem(
         children=[
             ast.Paragraph(children=[ast.Text("This is some code:")]),
-            ast.Code("python", "print('hello world')\n"),
+            ast.Code("python", "def foo():\n    print('hello world')\n"),
         ]
     )

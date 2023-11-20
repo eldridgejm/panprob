@@ -1,6 +1,6 @@
 """Renders a problem to HTML."""
 
-from textwrap import dedent, indent
+from textwrap import dedent
 from uuid import uuid4
 
 from .. import ast, exceptions
@@ -47,7 +47,6 @@ def _render_problem(node: ast.Problem, render_child):
             rendered_children.append(render_child(child))
 
     contents = "\n".join(rendered_children)
-    contents = indent(contents, "    " * 2)
 
     return dedent(
         """
@@ -64,7 +63,6 @@ def _render_problem(node: ast.Problem, render_child):
 
 def _render_subproblem(node: ast.Subproblem, counter: int, render_child):
     contents = "\n".join(render_child(child) for child in node.children)
-    contents = indent(contents, "    ")
 
     return dedent(
         """
@@ -102,7 +100,15 @@ def _render_paragraph(node: ast.Paragraph, render_child):
 
 @_renderer(ast.Code)
 def _render_code(node: ast.Code, render_child):
-    return f'<pre class="code"><code>{node.code}</code></pre>'
+    return dedent(
+        """
+            <pre class="code"><code>
+            {code}
+            </code></pre>
+            """.strip(
+            "\n"
+        )
+    ).format(code=node.code)
 
 
 @_renderer(ast.InlineCode)
@@ -141,7 +147,6 @@ def _render_truefalse(node: ast.TrueFalse, render_child):
 @_renderer(ast.Solution)
 def _render_solution(node: ast.Solution, render_child):
     contents = "\n".join(render_child(child) for child in node.children)
-    contents = indent(contents, "    ")
     return dedent(
         """
         <details>
