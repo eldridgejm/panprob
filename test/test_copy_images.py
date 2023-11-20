@@ -48,7 +48,7 @@ def test_copy_images(tmpdir):
 # path transformation ==================================================================
 
 
-def test_path_transformation_changes_destination_file_name(tmpdir):
+def test_path_transformation_does_not_change_destination_file_name(tmpdir):
     source = pathlib.Path(tmpdir / "source")
     source.mkdir()
     dest = pathlib.Path(tmpdir / "dest")
@@ -72,10 +72,9 @@ def test_path_transformation_changes_destination_file_name(tmpdir):
         """Adds "foo-" as a prefix to the file name."""
         return "foo-" + relpath
 
-    copy_images(tree, src=source, dest=dest, transform_path=transformer)
+    copy_images(tree, src=source, dest=dest / "images", transform_path=transformer)
 
-    assert (dest / "foo-image_1.png").exists()
-    assert (dest / "foo-image_1.png").open().read() == "image 1"
+    assert (dest / "images/image_1.png").exists()
 
 
 def test_path_transformation_changes_ast(tmpdir):

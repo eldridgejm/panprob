@@ -244,6 +244,11 @@ def _convert_textit(cmd: Command, convert):
     return ast.Blob(children=[ast.Text(cmd.args[0].raw_contents, italic=True)])
 
 
+@_cmd_converter("emph")
+def _convert_emph(cmd: Command, convert):
+    return ast.Blob(children=[ast.Text(cmd.args[0].raw_contents, italic=True)])
+
+
 # math ---------------------------------------------------------------------------------
 
 
@@ -267,7 +272,9 @@ def _convert_display_math(env: Environment, convert):
 
 @_cmd_converter("includegraphics")
 def _convert_includegraphics(cmd: Command, convert):
-    return ast.ImageFile(relative_path=cmd.args[0].raw_contents)
+    # there can be optional arguments before the required argument, so we want the
+    # last argument here
+    return ast.ImageFile(relative_path=cmd.args[-1].raw_contents)
 
 
 # code ---------------------------------------------------------------------------------
@@ -282,8 +289,10 @@ def _convert_minted(env: Environment, convert):
 
 @_cmd_converter("inputminted")
 def _convert_inputminted(cmd: Command, convert):
+    # there can be optional arguments before the required argument, so we want the
+    # last two arguments here
     return ast.CodeFile(
-        language=cmd.args[0].raw_contents, relative_path=cmd.args[1].raw_contents
+        language=cmd.args[-2].raw_contents, relative_path=cmd.args[-1].raw_contents
     )
 
 

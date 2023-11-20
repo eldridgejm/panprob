@@ -104,7 +104,7 @@ def test_parses_problem_with_bold_text():
     )
 
 
-def parses_problem_with_italic_text():
+def test_parses_problem_with_italic_text():
     tree = parse(
         dedent(
             r"""
@@ -117,8 +117,35 @@ def parses_problem_with_italic_text():
 
     assert tree == ast.Problem(
         children=[
-            ast.Text("\n    hello "),
-            ast.Text("world", italic=True),
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello "),
+                    ast.Text("world", italic=True),
+                ]
+            )
+        ]
+    )
+
+
+def test_parses_problem_with_emph():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                hello \emph{world}
+            \end{prob}
+            """
+        )
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.Paragraph(
+                children=[
+                    ast.Text("hello "),
+                    ast.Text("world", italic=True),
+                ]
+            )
         ]
     )
 
@@ -243,12 +270,33 @@ def test_parses_problem_with_mintinline_code():
     )
 
 
-def test_inputminted(tmp_path):
+def test_inputminted():
     tree = parse(
         dedent(
             r"""
             \begin{prob}
                 \inputminted{python}{code.py}
+            \end{prob}
+            """
+        ),
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.CodeFile(
+                "python",
+                "code.py",
+            )
+        ]
+    )
+
+
+def test_input_minted_ignores_optional_arguments():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                \inputminted[breaklines]{python}{code.py}
             \end{prob}
             """
         ),
@@ -626,12 +674,32 @@ def test_inline_responsebox_on_own_line_creates_a_new_paragraph():
 # media ================================================================================
 
 
-def test_includegraphics(tmp_path):
+def test_includegraphics():
     tree = parse(
         dedent(
             r"""
             \begin{prob}
                 \includegraphics{image.png}
+            \end{prob}
+            """
+        ),
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.ImageFile(
+                relative_path="image.png",
+            )
+        ]
+    )
+
+
+def test_include_graphics_ignores_optional_argument():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                \includegraphics[width=1in]{image.png}
             \end{prob}
             """
         ),

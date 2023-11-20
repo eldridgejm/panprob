@@ -35,7 +35,7 @@ The environments understood by the parser are:
 The commands understood by the parser are:
 
 - :code:`\\textbf` for bold text.
-- :code:`\\textit` for italic text.
+- :code:`\\textit` and :code:`\\emph` for italic text.
 - :code:`\\includegraphics` for images.
 - :code:`\\inputminted` for code.
 - :code:`\\mintinline` for inline code.
