@@ -165,6 +165,30 @@ def test_inline_math():
     assert parse(md) == expected
 
 
+def test_inline_math_with_multiple_pieces_of_math_on_same_line():
+    md = dedent(
+        """
+        This is math: $$x^2$$ and $$y^2$$.
+        """
+    )
+
+    expected = ast.Problem(
+        children=[
+            ast.Paragraph(
+                children=[
+                    ast.Text("This is math: "),
+                    ast.InlineMath("x^2"),
+                    ast.Text(" and "),
+                    ast.InlineMath("y^2"),
+                    ast.Text("."),
+                ]
+            ),
+        ]
+    )
+
+    assert parse(md) == expected
+
+
 def test_solution():
     md = dedent(
         """

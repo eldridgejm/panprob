@@ -65,7 +65,7 @@ class _InlineMath(marko.inline.InlineElement):
 
     """
 
-    pattern = r"\$\$(.+)\$\$"
+    pattern = r"\$\$(.+?)\$\$"  # don't be greedy!
     parse_children = False
     priority = 5
 
