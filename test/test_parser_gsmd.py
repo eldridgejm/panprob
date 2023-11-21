@@ -189,6 +189,28 @@ def test_inline_math_with_multiple_pieces_of_math_on_same_line():
     assert parse(md) == expected
 
 
+def test_inline_math_containing_a_literal():
+    md = dedent(
+        r"""
+        This is math: $$\{a, b, c\}$$.
+        """
+    )
+
+    expected = ast.Problem(
+        children=[
+            ast.Paragraph(
+                children=[
+                    ast.Text("This is math: "),
+                    ast.InlineMath(r"\{a, b, c\}"),
+                    ast.Text("."),
+                ]
+            ),
+        ]
+    )
+
+    assert parse(md) == expected
+
+
 def test_solution():
     md = dedent(
         """

@@ -67,7 +67,11 @@ class _InlineMath(marko.inline.InlineElement):
 
     pattern = r"\$\$(.+?)\$\$"  # don't be greedy!
     parse_children = False
-    priority = 5
+
+    # we set this to a high priority so that it is matched before
+    # marko.inline.Literal elements, such as are produced when
+    # parsing LaTeX fragments like `$$A = \{1, 2, 3\}$$`.
+    priority = 10
 
     def __init__(self, match):
         self.latex = match.group(1)
