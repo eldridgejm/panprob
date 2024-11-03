@@ -55,6 +55,7 @@
               pytest
               sphinx
               sphinx_rtd_theme
+              black
               pip
             ];
             doCheck = true;
