@@ -8,6 +8,22 @@ short answer boxes.
 For details about this format, see the `Gradescope documentation
 <https://help.gradescope.com/article/gm5cmcz19k-instructor-assignment-online>`_.
 
+Limitations
+-----------
+
+This parser only supports ``$$...$$`` delimiters for math. The ``\\[...\\]`` and
+``\\(...\\)`` delimiters are not supported and will cause a parse error.
+
+All ``$$...$$`` content is parsed as inline math (:class:`panprob.ast.InlineMath`).
+This parser does not produce :class:`panprob.ast.DisplayMath` nodes.
+
+LaTeX math environments like ``align`` inside ``$$...$$`` are not detected. If
+you write ``$$\\begin{align}...\\end{align}$$`` in GSMD, it will be parsed as
+inline math containing the literal ``\\begin{align}...`` text. Converting this
+to DSCTeX will produce invalid LaTeX (``$\\begin{align}...$``).
+
+To use align environments, author your content in DSCTeX format instead.
+
 """
 
 from .. import ast, exceptions, postprocessors

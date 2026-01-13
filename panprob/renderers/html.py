@@ -129,6 +129,12 @@ def _render_displaymath(node: ast.DisplayMath, render_child):
     return f'<div class="math">\\[{node.latex}\\]</div>'
 
 
+@_renderer(ast.AlignMath)
+def _render_alignmath(node: ast.AlignMath, render_child):
+    env = "align*" if node.starred else "align"
+    return f'<div class="math">$$\\begin{{{env}}}{node.latex}\\end{{{env}}}$$</div>'
+
+
 # solutions and response areas ---------------------------------------------------------
 
 

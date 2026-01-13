@@ -222,6 +222,54 @@ def test_parses_problem_with_display_math():
     )
 
 
+def test_parses_problem_with_align():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                \begin{align}
+                    x &= 1 \\
+                    y &= 2
+                \end{align}
+            \end{prob}
+            """
+        )
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.AlignMath(
+                "\n        x &= 1 \\\\\n        y &= 2\n    ",
+                starred=False,
+            ),
+        ]
+    )
+
+
+def test_parses_problem_with_align_star():
+    tree = parse(
+        dedent(
+            r"""
+            \begin{prob}
+                \begin{align*}
+                    x &= 1 \\
+                    y &= 2
+                \end{align*}
+            \end{prob}
+            """
+        )
+    )
+
+    assert tree == ast.Problem(
+        children=[
+            ast.AlignMath(
+                "\n        x &= 1 \\\\\n        y &= 2\n    ",
+                starred=True,
+            ),
+        ]
+    )
+
+
 # code =================================================================================
 
 

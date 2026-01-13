@@ -267,6 +267,16 @@ def _convert_display_math(env: Environment, convert):
     return ast.DisplayMath(env.raw_contents)
 
 
+@_env_converter("align")
+def _convert_align(env: Environment, convert):
+    return ast.AlignMath(env.raw_contents, starred=False)
+
+
+@_env_converter("align*")
+def _convert_align_star(env: Environment, convert):
+    return ast.AlignMath(env.raw_contents, starred=True)
+
+
 # media --------------------------------------------------------------------------------
 
 
