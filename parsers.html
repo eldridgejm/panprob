@@ -7,8 +7,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Parsers &mdash; panprob 0.1.4 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -56,6 +56,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-panprob.parsers.gsmd">Gradescope Markdown</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#limitations">Limitations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#panprob.parsers.gsmd.parse"><code class="docutils literal notranslate"><span class="pre">parse()</span></code></a></li>
 </ul>
 </li>
@@ -159,6 +160,7 @@ node. See the documentation on extending <cite>panprob</cite> for examples.</p>
 <p>The environments understood by the parser are:</p>
 <ul class="simple">
 <li><p><code class="code docutils literal notranslate"><span class="pre">$</span></code> and <code class="code docutils literal notranslate"><span class="pre">$$</span></code> for inline and display math, respectively.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">\begin{align}</span></code> .. <code class="code docutils literal notranslate"><span class="pre">\end{align}</span></code> and <code class="code docutils literal notranslate"><span class="pre">\begin{align*}</span></code> .. <code class="code docutils literal notranslate"><span class="pre">\end{align*}</span></code> for aligned equations.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">\begin{prob}</span></code> .. <code class="code docutils literal notranslate"><span class="pre">\end{prob}</span></code> environments for problems.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">\begin{subprob}</span></code> .. <code class="code docutils literal notranslate"><span class="pre">\end{subprob}</span></code> environments for subproblems.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">\begin{minted}</span></code> .. <code class="code docutils literal notranslate"><span class="pre">\end{minted}</span></code> environments for code.</p></li>
@@ -303,9 +305,9 @@ or extending the defaults.</p>
 represent inline Python code. This is not one of the commands understood by
 this parser by default, but you can define a converter function to convert this
 command to a <a class="reference internal" href="ast.html#panprob.ast.InlineCode" title="panprob.ast.InlineCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineCode</span></code></a> node and pass it to <a class="reference internal" href="#panprob.parsers.dsctex.parse" title="panprob.parsers.dsctex.parse"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse()</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">panprob.ast</span> <span class="kn">import</span> <span class="n">InlineCode</span><span class="p">,</span> <span class="n">Blob</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">panprob.ast</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineCode</span><span class="p">,</span> <span class="n">Blob</span>
 
-<span class="k">def</span> <span class="nf">convert_python</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_python</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">Blob</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">InlineCode</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="s2">&quot;this&quot;</span><span class="p">)])</span>
 
 <span class="n">latex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\python{x = 3 + 4}&quot;</span>
@@ -330,6 +332,18 @@ writing online quizzes. It provides support for LaTeX math, code blocks, and
 various response area types, such as multiple choices, multiple selects, and
 short answer boxes.</p>
 <p>For details about this format, see the <a class="reference external" href="https://help.gradescope.com/article/gm5cmcz19k-instructor-assignment-online">Gradescope documentation</a>.</p>
+<section id="limitations">
+<h3>Limitations<a class="headerlink" href="#limitations" title="Link to this heading"></a></h3>
+<p>This parser only supports <code class="docutils literal notranslate"><span class="pre">$$...$$</span></code> delimiters for math. The <code class="docutils literal notranslate"><span class="pre">\[...\]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">\(...\)</span></code> delimiters are not supported and will cause a parse error.</p>
+<p>All <code class="docutils literal notranslate"><span class="pre">$$...$$</span></code> content is parsed as inline math (<a class="reference internal" href="ast.html#panprob.ast.InlineMath" title="panprob.ast.InlineMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.InlineMath</span></code></a>).
+This parser does not produce <a class="reference internal" href="ast.html#panprob.ast.DisplayMath" title="panprob.ast.DisplayMath"><code class="xref py py-class docutils literal notranslate"><span class="pre">panprob.ast.DisplayMath</span></code></a> nodes.</p>
+<p>LaTeX math environments like <code class="docutils literal notranslate"><span class="pre">align</span></code> inside <code class="docutils literal notranslate"><span class="pre">$$...$$</span></code> are not detected. If
+you write <code class="docutils literal notranslate"><span class="pre">$$\begin{align}...\end{align}$$</span></code> in GSMD, it will be parsed as
+inline math containing the literal <code class="docutils literal notranslate"><span class="pre">\begin{align}...</span></code> text. Converting this
+to DSCTeX will produce invalid LaTeX (<code class="docutils literal notranslate"><span class="pre">$\begin{align}...$</span></code>).</p>
+<p>To use align environments, author your content in DSCTeX format instead.</p>
+</section>
 <p>The main functionality of the module is provided by the <a class="reference internal" href="#panprob.parsers.gsmd.parse" title="panprob.parsers.gsmd.parse"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse()</span></code></a> function:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="panprob.parsers.gsmd.parse">

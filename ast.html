@@ -7,8 +7,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Extending panprob &mdash; panprob 0.1.4 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -431,6 +431,35 @@ is not meant to be used in the final AST that is returned to the caller.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="panprob.ast.AlignMath">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panprob.ast.</span></span><span class="sig-name descname"><span class="pre">AlignMath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panprob.ast.AlignMath" title="Link to this definition"></a></dt>
+<dd><p>A block of aligned equations using the align environment.</p>
+<p>A leaf node.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="panprob.ast.AlignMath.latex">
+<span class="sig-name descname"><span class="pre">latex</span></span><a class="headerlink" href="#panprob.ast.AlignMath.latex" title="Link to this definition"></a></dt>
+<dd><p>The LaTeX code to typeset (contents of the align environment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="panprob.ast.AlignMath.starred">
+<span class="sig-name descname"><span class="pre">starred</span></span><a class="headerlink" href="#panprob.ast.AlignMath.starred" title="Link to this definition"></a></dt>
+<dd><p>If True, uses align* (unnumbered). If False, uses align (numbered).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

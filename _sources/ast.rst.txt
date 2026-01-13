@@ -87,6 +87,7 @@ Math
 ~~~~
 .. autoclass:: DisplayMath
 .. autoclass:: InlineMath
+.. autoclass:: AlignMath
 
 Code
 ~~~~

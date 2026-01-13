@@ -25,6 +25,7 @@ The main functionality of the module is provided by the :func:`parse` function:
 The environments understood by the parser are:
 
 - :code:`$` and :code:`$$` for inline and display math, respectively.
+- :code:`\\begin{align}` .. :code:`\\end{align}` and :code:`\\begin{align*}` .. :code:`\\end{align*}` for aligned equations.
 - :code:`\\begin{prob}` .. :code:`\\end{prob}` environments for problems.
 - :code:`\\begin{subprob}` .. :code:`\\end{subprob}` environments for subproblems.
 - :code:`\\begin{minted}` .. :code:`\\end{minted}` environments for code.
