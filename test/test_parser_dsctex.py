@@ -239,12 +239,7 @@ def test_parses_problem_with_align():
     assert tree == ast.Problem(
         children=[
             ast.AlignMath(
-                dedent(
-                    r"""
-                    x &= 1 \\
-                    y &= 2
-                """
-                ),
+                "\n        x &= 1 \\\\\n        y &= 2\n    ",
                 starred=False,
             ),
         ]
@@ -268,12 +263,7 @@ def test_parses_problem_with_align_star():
     assert tree == ast.Problem(
         children=[
             ast.AlignMath(
-                dedent(
-                    r"""
-                    x &= 1 \\
-                    y &= 2
-                """
-                ),
+                "\n        x &= 1 \\\\\n        y &= 2\n    ",
                 starred=True,
             ),
         ]

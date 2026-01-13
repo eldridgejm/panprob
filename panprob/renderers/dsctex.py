@@ -109,6 +109,19 @@ def _render_displaymath(node: ast.DisplayMath, render_child):
     ).format(latex=latex)
 
 
+@_renderer(ast.AlignMath)
+def _render_alignmath(node: ast.AlignMath, render_child):
+    env = "align*" if node.starred else "align"
+    latex = indent(node.latex, "    ")
+    return dedent(
+        r"""
+        \begin{{{env}}}
+        {latex}
+        \end{{{env}}}
+        """
+    ).format(env=env, latex=latex)
+
+
 # solutions and response areas ---------------------------------------------------------
 
 

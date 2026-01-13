@@ -371,6 +371,26 @@ class InlineMath(LeafNode):
         self.latex = latex
 
 
+class AlignMath(LeafNode):
+    """A block of aligned equations using the align environment.
+
+    A leaf node.
+
+    Attributes
+    ----------
+    latex : str
+        The LaTeX code to typeset (contents of the align environment).
+    starred : bool
+        If True, uses align* (unnumbered). If False, uses align (numbered).
+
+    """
+
+    def __init__(self, latex: str, starred: bool = False):
+        super().__init__()
+        self.latex = latex
+        self.starred = starred
+
+
 # code ---------------------------------------------------------------------------------
 
 
@@ -550,6 +570,7 @@ Problem.allowed_child_types = (
     Code,
     CodeFile,
     DisplayMath,
+    AlignMath,
     ImageFile,
     MultipleChoice,
     MultipleSelect,
@@ -574,6 +595,7 @@ Choice.allowed_child_types = (
     Code,
     CodeFile,
     DisplayMath,
+    AlignMath,
 )
 
 Solution.allowed_child_types = (
@@ -582,6 +604,7 @@ Solution.allowed_child_types = (
     Code,
     CodeFile,
     DisplayMath,
+    AlignMath,
     ImageFile,
 )
 
