@@ -238,6 +238,54 @@ def test_display_math():
     )
 
 
+def test_align_math():
+    tree = ast.Problem(
+        children=[
+            ast.AlignMath("x &= 1 \\\\\ny &= 2", starred=False),
+        ]
+    )
+
+    assert (
+        render(tree)
+        == dedent(
+            r"""
+        \begin{prob}
+
+            \begin{align}
+                x &= 1 \\
+                y &= 2
+            \end{align}
+
+        \end{prob}
+        """
+        ).strip()
+    )
+
+
+def test_align_star_math():
+    tree = ast.Problem(
+        children=[
+            ast.AlignMath("x &= 1 \\\\\ny &= 2", starred=True),
+        ]
+    )
+
+    assert (
+        render(tree)
+        == dedent(
+            r"""
+        \begin{prob}
+
+            \begin{align*}
+                x &= 1 \\
+                y &= 2
+            \end{align*}
+
+        \end{prob}
+        """
+        ).strip()
+    )
+
+
 def test_true_false():
     tree = ast.Problem(children=[ast.TrueFalse(True)])
 

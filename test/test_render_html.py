@@ -39,3 +39,15 @@ def test_no_indentation_in_multiline_code_block():
     )
 
     assert render(tree) == expected
+
+
+def test_align_math():
+    tree = ast.AlignMath("x &= 1 \\\\\ny &= 2", starred=False)
+
+    assert render(tree) == '<div class="math">\\begin{align}x &= 1 \\\\\ny &= 2\\end{align}</div>'
+
+
+def test_align_star_math():
+    tree = ast.AlignMath("x &= 1 \\\\\ny &= 2", starred=True)
+
+    assert render(tree) == '<div class="math">\\begin{align*}x &= 1 \\\\\ny &= 2\\end{align*}</div>'
