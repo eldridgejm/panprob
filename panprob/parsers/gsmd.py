@@ -11,8 +11,11 @@ For details about this format, see the `Gradescope documentation
 Limitations
 -----------
 
-This parser does not distinguish between inline and display math. All ``$$...$$``
-delimited content is parsed as inline math (:class:`panprob.ast.InlineMath`).
+This parser only supports ``$$...$$`` delimiters for math. The ``\\[...\\]`` and
+``\\(...\\)`` delimiters are not supported and will cause a parse error.
+
+All ``$$...$$`` content is parsed as inline math (:class:`panprob.ast.InlineMath`).
+This parser does not produce :class:`panprob.ast.DisplayMath` nodes.
 
 LaTeX math environments like ``align`` inside ``$$...$$`` are not detected. If
 you write ``$$\\begin{align}...\\end{align}$$`` in GSMD, it will be parsed as
